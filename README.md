@@ -22,7 +22,7 @@ Overall, we provide a novel approach for improving
 performance and explainablity of VLMs.
 
 <p align="center">
-<img src="docs/teaser.jpe" width="800px"/>  
+<img src="teaser.jpg" width="800px"/>  
 <br>
 Tree-augmented Vision & Language (3VL) model architecture and training
 technique allows for rich exploration of the text space using several levels of incremental text augmentation from coarse to fine-grained. 
