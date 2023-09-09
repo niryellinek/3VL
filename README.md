@@ -44,3 +44,15 @@ technique allows for rich exploration of the text space using several levels of 
       (e.g. "several people standing in a green field together while flying kytes").
 3) Next, for each positive sub-caption we generate one negative caption for each Noun, Adjective, Adposition, and Verb in the sub-caption.
    *Note that we do not replace again words that appeared in previous tree levels. So information from a previous level flows without change.
+
+## Tree based training
+
+<p align="center">
+<img src="docs/tree_training.jpg" width="800px"/>  
+<br>
+For each image-text pair, we create a caption tree and for
+each level of the tree we calculate the cosine similarity between
+the image and all captions at that level. We apply softmax
+and calculate the Cross Entropy Loss. We then sum the
+cross-entropy loss over all the tree levels to get the tree loss. 
+</p>
