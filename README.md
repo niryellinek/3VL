@@ -64,7 +64,7 @@ A <blue>very</blue> long <red>sentence</red>.
    **Note** that we do not replace again words that appeared in previous tree levels. So information from a previous level flows without change.
 
   ```html
-   
+     <p style="color:DodgerBlue;">Lorem ipsum...</p>
 
    - for the above example we generate the following negative captions in each tree level
    - In the first level we generate " <p style="background-color:Tomato;">one</p> people" "several <blue>animals</blue> " 
