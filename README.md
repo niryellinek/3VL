@@ -47,7 +47,7 @@ technique allows for rich exploration of the text space using several levels of 
    *Note that we do not replace again words that appeared in previous tree levels. So information from a previous level flows without change.
 
    - for the above example we generate the following negative captions in each tree level
-   - In the first level we generate "<p style="color:red;"one people</p>", "<p style="color:red;"several animals</p>"
+   - In the first level we generate <p style="color:red;""one people"</p>, <p style="color:red;""several animals"</p>
    - In the second level we generate "several people and a blue field", "several people and a green forest"
    - In the third level we generate "several people gathered in a green field", "several people standing out a green field"
    - In the fourth level we generate "several people standing in a green field together while soaring kytes", "several people standing in a green field together while flying sales"
