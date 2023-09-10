@@ -61,14 +61,18 @@ A <blue>very</blue> long <red>sentence</red>.
    - finally, the last level of the tree will contain the text of the full original caption
       (i.e. "several people standing in a green field together while flying kytes").
 3) Next, for each positive sub-caption we generate one negative caption for each Noun, Adjective, Adposition, and Verb in the sub-caption.
-   *Note that we do not replace again words that appeared in previous tree levels. So information from a previous level flows without change.
+   **Note** that we do not replace again words that appeared in previous tree levels. So information from a previous level flows without change.
+
+  ```html
+   
 
    - for the above example we generate the following negative captions in each tree level
-   - In the first level we generate "<span style='color: red;'>one</span> people" "several<span style='color: red;'> animals"</span> 
+   - In the first level we generate "<p style="background-color:Tomato;">one</p> people" "several<span style='color: red;'> animals"</span> 
    - In the second level we generate "several people and a blue field", "several people and a green forest"
    - In the third level we generate "several people gathered in a green field", "several people standing out a green field"
    - In the fourth level we generate "several people standing in a green field together while soaring kytes", "several people standing in a green field together while flying sales"
-   - *Note that our negatives generation methid can generate grammatical errors sometimes
+   - **Note** that our negatives generation methid can generate grammatical errors sometimes
+  ```
 
 ## Tree based training
 
