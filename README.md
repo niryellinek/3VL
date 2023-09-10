@@ -28,8 +28,22 @@ Tree-augmented Vision & Language (3VL) model architecture and training
 technique allows for rich exploration of the text space using several levels of incremental text augmentation from coarse to fine-grained. 
 </p>
 
+<style>
+blue {
+  color: lightblue;
+}
 
-A very <span style='color: red;'>long</span> sentence.
+red {
+  color: red;
+}
+
+green {
+  color: lightgreen;
+}
+</style>
+
+
+A <blue>very</blue> long <red>sentence</red>.
 
 ## Caption tree generation
 1) For each image caption pair we first parse the ground truth caption using spaCy to get all noun phrases and the part of speech of each word in the caption.
