@@ -28,23 +28,6 @@ Tree-augmented Vision & Language (3VL) model architecture and training
 technique allows for rich exploration of the text space using several levels of incremental text augmentation from coarse to fine-grained. 
 </p>
 
-<style>
-blue {
-  color: lightblue;
-}
-
-red {
-  color: red;
-}
-
-green {
-  color: lightgreen;
-}
-</style>
-
-
-A <blue>very</blue> long <red>sentence</red>.
-
 ## Caption tree generation
 1) For each image caption pair we first parse the ground truth caption using spaCy to get all noun phrases and the part of speech of each word in the caption.
 2) Then, starting with the noun phrases, we reconstruct the full caption hierarchically to get a positive sub-caption for each level in the tree
@@ -63,17 +46,13 @@ A <blue>very</blue> long <red>sentence</red>.
 3) Next, for each positive sub-caption we generate one negative caption for each Noun, Adjective, Adposition, and Verb in the sub-caption.
    **Note** that we do not replace again words that appeared in previous tree levels. So information from a previous level flows without change.
 
-  ```html
-     <p style="color:DodgerBlue;">Lorem ipsum...</p>
-
    - for the above example we generate the following negative captions in each tree level
-   - In the first level we generate " <p style="background-color:Tomato;">one</p> people" "several <blue>animals</blue> " 
+   - In the first level we generate "one people", "several animals" 
    - In the second level we generate "several people and a blue field", "several people and a green forest"
    - In the third level we generate "several people gathered in a green field", "several people standing out a green field"
    - In the fourth level we generate "several people standing in a green field together while soaring kytes", "several people standing in a green field together while flying sales"
    - **Note** that our negatives generation methid can generate grammatical errors sometimes
-  ```
-
+  
 ## Tree based training
 
 <p align="center">
