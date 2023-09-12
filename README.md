@@ -65,8 +65,8 @@ technique allows for rich exploration of the text space using several levels of 
 In each negative generation we replace one word of the positive caption, either a Noun, Adjective, Adposition, or Verb. 
 Where each negative word is generated as:
 1. An opposite (Antonym) of the positive word using FLAN-T5 with prompt (e.g. "find an opposite for the word:
-...”)
-2.  If an opposite is not found then we generate a co-hyponym[^1] of the positive word using WordNet
+...”).
+2.  If an opposite is not found then we generate a co-hyponym[^1] of the positive word using WordNet.
 3.  If a co-hyponym[^1] is not found then we generate a word to fill the masked positive word using    FLAN-T5 (the token 'extra_id_0' replaces the positive word in prompt).
 
 
@@ -89,4 +89,17 @@ For each image-caption pair, we first create a caption tree. Then, for each leve
 
 ## Results
 
+### Downstream tasks
 
+We show here results of several downstream tasks with the Original CLIP model replaced by our 3VL.
+
+1. Image/Text retrieval
+2. Image segmentation using SegCLIP[[1]](#1)
+3. 
+
+## References
+<a id="1">[1]</a> 
+Timo L ̈uddecke and Alexander Ecker, “Image segmen-
+tation using text and image prompts,” in Proceedings of
+the IEEE/CVF Conference on Computer Vision and Pat-
+tern Recognition (CVPR), June 2022, pp. 7086–7096.
