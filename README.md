@@ -95,13 +95,25 @@ We show here results of several downstream tasks with the Original CLIP model re
 
 1. Image/Text retrieval
 
-1.1 Image2Text on COCO 2017 validation set
+  - Image2Text on COCO 2017 validation set
+    
+      | Model       | R@1       | R@5       | R@10   |
+      | ------------|:--------: | ---------:|-------:|
+      | CLIP        | 32.54     | 57.7      | 68.08
+      | RB+LLM Negs | 32.56     | 57.84     | 68.06
+      | 3VL         | **33.72** | **62.08** |**73.12**
+    
+  - Text2Image on COCO 2017 validation set
+
+      | Model       | R@1       | R@5       | R@10   |
+      | ------------|:--------: | ---------:|-------:|
+      | CLIP        | 28.66     | 53.04     | 64.44
+      | RB+LLM Negs | 28.58     | 53.12     | 64.42
+      | 3VL         | **36.54** | **63.32** |**74.48**
+    
+  - 
    
-   | Model       | R@1       | R@5       | R@10   |
-   | ------------|:--------: | ---------:|-------:|
-   | CLIP        | 32.54     | 57.7      | 90.74
-   | RB+LLM Negs | 32.56     | 57.84     | 90.72
-   | 3VL         | **33.72** | **62.08** |**93.52**
+   
 
    
 3. Image segmentation using SegCLIP[[1]](#1)
