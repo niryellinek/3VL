@@ -1,4 +1,4 @@
-# 3VL: using Trees to teach Vision & Language models compositional concepts
+![image](https://github.com/niryellinek/3VL/assets/93285224/2735feab-4eb7-4bf9-afa9-e80d531c2327)# 3VL: using Trees to teach Vision & Language models compositional concepts
 
 > Nir Yellinek<sup>⋆</sup>, Leonid Karlinsky<sup>†</sup>, Raja Giryes<sup>⋆</sup>
 > 
@@ -94,8 +94,18 @@ For each image-caption pair, we first create a caption tree. Then, for each leve
 We show here results of several downstream tasks with the Original CLIP model replaced by our 3VL.
 
 1. Image/Text retrieval
-2. Image segmentation using SegCLIP[[1]](#1)
-3. 
+
+1.1 Image2Text on COCO 2017 validation set
+   
+   | Model       | R@1       | R@5       | R@10   |
+   | ------------|:--------: | ---------:|-------:|
+   | CLIP        | 32.54     | 57.7      | 90.74
+   | RB+LLM Negs | 32.56     | 57.84     | 90.72
+   | 3VL         | **33.72** | **62.08** |**93.52**
+
+   
+3. Image segmentation using SegCLIP[[1]](#1)
+4. 
 
 ## References
 <a id="1">[1]</a> 
