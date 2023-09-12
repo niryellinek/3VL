@@ -1,6 +1,6 @@
 # 3VL: using Trees to teach Vision & Language models compositional concepts
 
-> Nir Yellinek⋆, Leonid Karlinsky†, Raja Giryes⋆
+> Nir Yellinek<sup>⋆</sup>, Leonid Karlinsky<sup>†</sup>, Raja Giryes<sup>⋆</sup>
 > 
 > ⋆ Tel-Aviv University, † MIT-IBM Watson AI Lab
 >
@@ -48,7 +48,8 @@ technique allows for rich exploration of the text space using several levels of 
       (i.e. "several people standing in a green field together while flying kytes").
      
 4) Next, for each positive sub-caption we generate one negative caption for each Noun, Adjective, Adposition, and Verb in the sub-caption.
-   **Note** that we do not replace again words that appeared in previous tree levels. So information from a previous level flows without change.
+
+   **_Note_** that we do not replace again words that appeared in previous tree levels. So information from a previous level flows without change.
 
    for the above example we generate the following negative captions:
    - In the first level we generate "one people", "several animals" (for the positive text "several people").
@@ -57,9 +58,21 @@ technique allows for rich exploration of the text space using several levels of 
    - In the third level we generate "several people gathered in a green field", "several people standing out a green field" (for the positive text "several people standing in a green field").
    - In the fourth level we generate "several people standing in a green field together while soaring kytes", "several people standing in a green field together while flying sales"
 (for the positive text "several people standing in a green field together while flying kytes").
-   - **Note** that our automated negatives generation method can generate grammatical errors sometimes
+   - **_Note_** that our automated negatives generation method can generate grammatical errors sometimes
 
 ### Negatives generation
+
+In each negative generation we replace one word of the positive caption, either a Noun, Adjective, Adposition, or Verb. 
+Where each negative word is generated as:
+1. An opposite (Antonym) of the positive word using FLAN-T5 with prompt (e.g. "find an opposite for the word:
+...”)
+2.  If an opposite is not found then we generate a co-hyponym<sup>^</sup> of the positive word using WordNet
+3.  If a co-hyponym<sup>^</sup> is not found then we generate a word to fill the masked positive word using    FLAN-T5 (the token 'extra_id_0' replaces the positive word in prompt).
+
+*see above example for caption tree creation and negatives generation for the caption "several people standing in a green field together while flying kytes".
+
+^  A hyponym is a word that have a more specific meaning than its hypernym (the direct ancestor in the wordnet tree). For example, ’apple’ is a hyponym of ’fruit’, and ’fruit’ is the hypernym of ’apple’. 
+Co-hyponyms are words that share the same hypernym in the wordnet tree (e.g. ’apple’ and ’banana’ are co-hyponyms as they share the hypernym ’fruit’; the words ’car’ and ’motorcycle’, ’blue’ and ’yellow’ are co-hyponyms as well.
   
 ## Tree based training
 
