@@ -157,6 +157,17 @@ We show here results of several downstream tasks with the Original CLIP model re
    
 3. 
 
+### Using 3VL for interpretability of VLMs
+>To offer extra insight into model decision, we expand the caption
+>tree at the level in which the model failed, with extra generated positive and negative words and check model >image-text matching probability for all these words.
+
+
+### User study
+
+
+## Ablations
+
+
 ## References
 <a id="1">[1]</a> 
 Timo L ̈uddecke and Alexander Ecker, “Image segmen-
