@@ -97,7 +97,7 @@ We show here results of several downstream tasks with the Original CLIP model re
 
 1. Image/Text retrieval
 
-  - Image2Text on COCO 2017 validation set
+     - Image2Text on COCO 2017 validation set
     
       | Model       | R@1         | R@5         | R@10   |
       | ------------|:-----------:| -----------:|-------:|
@@ -105,7 +105,7 @@ We show here results of several downstream tasks with the Original CLIP model re
       | RB+LLM Negs | 32.56       | 57.84       | 68.06
       | 3VL         | **_33.72_** | **_62.08_** |**_73.12_**
     
-  - Text2Image on COCO 2017 validation set
+     - Text2Image on COCO 2017 validation set
 
       | Model       | R@1         | R@5         | R@10   |
       | ------------|:-----------:| -----------:|-------:|
@@ -113,7 +113,7 @@ We show here results of several downstream tasks with the Original CLIP model re
       | RB+LLM Negs | 28.58       | 53.12       | 64.42
       | 3VL         | **_36.54_** | **_63.32_** |**_74.48_**
     
-  - 
+     - Image2Text on FLICKR test set
    
    
 
