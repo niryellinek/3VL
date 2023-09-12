@@ -66,14 +66,14 @@ In each negative generation we replace one word of the positive caption, either 
 Where each negative word is generated as:
 1. An opposite (Antonym) of the positive word using FLAN-T5 with prompt (e.g. "find an opposite for the word:
 ...”)
-2.  If an opposite is not found then we generate a co-hyponym<sup>*</sup> of the positive word using WordNet
-3.  If a co-hyponym[^1] <sup>*</sup> is not found then we generate a word to fill the masked positive word using    FLAN-T5 (the token 'extra_id_0' replaces the positive word in prompt).
+2.  If an opposite is not found then we generate a co-hyponym[^1] of the positive word using WordNet
+3.  If a co-hyponym[^1] is not found then we generate a word to fill the masked positive word using    FLAN-T5 (the token 'extra_id_0' replaces the positive word in prompt).
 
-<sup>*</sup>  A hyponym is a word that have a more specific meaning than its hypernym (the direct ancestor in the wordnet tree). For example, ’apple’ is a hyponym of ’fruit’, and ’fruit’ is the hypernym of ’apple’. 
-Co-hyponyms are words that share the same hypernym in the wordnet tree (e.g. ’apple’ and ’banana’ are co-hyponyms as they share the hypernym ’fruit’; the words ’car’ and ’motorcycle’, ’blue’ and ’yellow’ are co-hyponyms as well.
 
-[^1]: A hyponym is a word that have a more specific meaning than its hypernym (the direct ancestor in the wordnet tree). For example, ’apple’ is a hyponym of ’fruit’, and ’fruit’ is the hypernym of ’apple’. 
-Co-hyponyms are words that share the same hypernym in the wordnet tree (e.g. ’apple’ and ’banana’ are co-hyponyms as they share the hypernym ’fruit’; the words ’car’ and ’motorcycle’, ’blue’ and ’yellow’ are co-hyponyms as well.
+[^1]: A hyponym is a word that have a more specific meaning than its hypernym (the direct ancestor in the wordnet tree). 
+  For example, ’apple’ is a hyponym of ’fruit’, and ’fruit’ is the hypernym of ’apple’. 
+    Co-hyponyms are words that share the same hypernym in the wordnet tree 
+      (e.g. ’apple’ and ’banana’ are co-hyponyms as they share the hypernym ’fruit’; the words ’car’ and ’motorcycle’, ’blue’ and ’yellow’ are co-hyponyms as well.
 
 ***see above example for caption tree creation and negatives generation for the caption "several people standing in a green field together while flying kytes".***
 
