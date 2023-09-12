@@ -1,7 +1,5 @@
 # 3VL: using Trees to teach Vision & Language models compositional concepts
 
-![image](https://github.com/niryellinek/3VL/assets/93285224/2735feab-4eb7-4bf9-afa9-e80d531c2327)
-
 > Nir Yellinek<sup>⋆</sup>, Leonid Karlinsky<sup>†</sup>, Raja Giryes<sup>⋆</sup>
 > 
 > ⋆ Tel-Aviv University, † MIT-IBM Watson AI Lab
@@ -159,8 +157,13 @@ We show here results of several downstream tasks with the Original CLIP model re
 
 ### Using 3VL for interpretability of VLMs
 >To offer extra insight into model decision, we expand the caption
->tree at the level in which the model failed, with extra generated positive and negative words and check model >image-text matching probability for all these words.
+>tree at the level in which the model failed, with extra generated positive and negative words and check model image-text matching probability for all these words.
 
+<p align="center">
+<img src="tree_expand_1.jpg" width="800px"/>  
+<br>
+Example of Caption tree expansion after failed adposition
+</p>
 
 ### User study
 
