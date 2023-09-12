@@ -1,6 +1,7 @@
 # 3VL: using Trees to teach Vision & Language models compositional concepts
 
 > Nir Yellinek⋆, Leonid Karlinsky†, Raja Giryes⋆
+> 
 > ⋆ Tel-Aviv University, † MIT-IBM Watson AI Lab
 >
 > Vision & Language models (VLMs) have proved effective
@@ -49,7 +50,7 @@ technique allows for rich exploration of the text space using several levels of 
 4) Next, for each positive sub-caption we generate one negative caption for each Noun, Adjective, Adposition, and Verb in the sub-caption.
    **Note** that we do not replace again words that appeared in previous tree levels. So information from a previous level flows without change.
 
-   - for the above example we generate the following negative captions in each tree level
+   for the above example we generate the following negative captions:
    - In the first level we generate "one people", "several animals" (for the positive text "several people").
    - In the second level we generate "several people and a blue field", "several people and a green forest"
       (for the positive text "several people and a green field").
@@ -58,7 +59,7 @@ technique allows for rich exploration of the text space using several levels of 
 (for the positive text "several people standing in a green field together while flying kytes").
    - **Note** that our automated negatives generation method can generate grammatical errors sometimes
 
-
+### Negatives generation
   
 ## Tree based training
 
