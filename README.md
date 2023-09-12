@@ -100,7 +100,7 @@ We show here results of several downstream tasks with the Original CLIP model re
   - Image2Text on COCO 2017 validation set
     
       | Model       | R@1       | R@5       | R@10   |
-      | ------------|:--------: | ---------:|-------:|
+      | ------------|---------: | ---------:|-------:|
       | CLIP        | 32.54     | 57.7      | 68.08
       | RB+LLM Negs | 32.56     | 57.84     | 68.06
       | 3VL         | **33.72** | **62.08** |**73.12**
