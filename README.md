@@ -1,4 +1,6 @@
-![image](https://github.com/niryellinek/3VL/assets/93285224/2735feab-4eb7-4bf9-afa9-e80d531c2327)# 3VL: using Trees to teach Vision & Language models compositional concepts
+# 3VL: using Trees to teach Vision & Language models compositional concepts
+
+![image](https://github.com/niryellinek/3VL/assets/93285224/2735feab-4eb7-4bf9-afa9-e80d531c2327)
 
 > Nir Yellinek<sup>⋆</sup>, Leonid Karlinsky<sup>†</sup>, Raja Giryes<sup>⋆</sup>
 > 
