@@ -98,12 +98,13 @@ We show here results of several downstream tasks with the Original CLIP model re
 1. Image/Text retrieval
 
      - Image2Text on COCO 2017 validation set
+
     
-      | Model       | R@1         | R@5         | R@10   |
-      | ------------|:-----------:| -----------:|-------:|
-      | CLIP        | 32.54       | 57.7        | 68.08
-      | RB+LLM Negs | 32.56       | 57.84       | 68.06
-      | 3VL         | **_33.72_** | **_62.08_** |**_73.12_**
+         | Model       | R@1         | R@5         | R@10   |
+         | ------------|:-----------:| -----------:|-------:|
+         | CLIP        | 32.54       | 57.7        | 68.08
+         | RB+LLM Negs | 32.56       | 57.84       | 68.06
+         | 3VL         | **_33.72_** | **_62.08_** |**_73.12_**
     
      - Text2Image on COCO 2017 validation set
 
@@ -134,8 +135,27 @@ We show here results of several downstream tasks with the Original CLIP model re
          | 3VL         | **_74_** | **_93.5_** |**_96.1_**   
 
    
-3. Image segmentation using SegCLIP[[1]](#1)
-4. 
+2. Image segmentation using SegCLIP[[1]](#1)
+
+    - Segmentation performance on PhraseCut 
+
+    
+         | Model       | IoU<sub>FG</sub> | IoU<sub>BIN</sub>| 
+         | ------------|:----------------:| ----------------:|
+         | CLIP        | 52.4             | 71.7             | 
+         | RB+LLM Negs | 51.7             | 69.8             | 
+         | 3VL         | **_53.4_**       | **_72.1_**       |
+      
+    
+     - Segmentation performance on COCO
+
+         | Model       | IoU<sub>FG</sub> | IoU<sub>BIN</sub>| 
+         | ------------|:----------------:| ----------------:|
+         | CLIP        | 54.8             | 73.2             | 
+         | RB+LLM Negs | 55.2             | 73.4             | 
+         | 3VL         | **57.2_**        | **_74.7_**       |
+   
+3. 
 
 ## References
 <a id="1">[1]</a> 
