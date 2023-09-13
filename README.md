@@ -178,8 +178,7 @@ Example of Caption tree expansion after failed adposition
 1. Top-1 accuracy on VL-Checklist when constraining **3V**L tree to max depth
 
          
-         | Depth   | Att       | Att       | Att       | Att        | Att       | Rel       | Rel       |
-         |         |color      | material  | size      | action     | state     | action    | spatial   |
+         | Depth   | Att color      | Att material      | Att size      | Att action       | Att state      | Rel action     | Rel spatial      |
          | ---------|:---------:|----------:|----------:|-----------:|----------:|----------:|----------:|
          |1        |72.70      |78.42      |69.28      |78.81       |70.99      |78.54      |74.10      |
          |2        |72.99      |79.51      |69.24      |79.81       |72.90      |79.04      |74.49      |
