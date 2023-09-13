@@ -171,7 +171,7 @@ Example of Caption tree expansion after failed adposition
 <br>
 </p>
 
-### User study
+
 
 
 ### Ablations
@@ -194,6 +194,9 @@ Example of Caption tree expansion after failed adposition
          | 2         | 72.99       | 79.51      | 69.24      | 79.81       | 72.90      | 79.04      | 74.49      |
          | 3         | 73.27       | 79.43      | 68.68      | 80.97       | 72.79      | 80.99      | 78.55      |
          | unlimited | **_75.57_** | **_82.63_**| **_70.72_** | **_81.10_**| **_75.35_** | **_81.94_** | **_81.15_** |
+
+
+### User study
 
 ## References
 <a id="1">[1]</a> 
