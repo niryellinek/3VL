@@ -87,7 +87,7 @@ For each image-caption pair, we first create a caption tree. Then, for each leve
 </p>
 
 
-## Results
+## Additional Results
 
    - Top-1 accuracy on VL-Checklist VG Object dataset
 
@@ -98,7 +98,12 @@ For each image-caption pair, we first create a caption tree. Then, for each leve
 |**_RB+LLM Negs_** |91.70       |83.20       |78.90       |90.30       |84.55       |77.00       |84.34
 |**_3VL_**         |**_93.82_** |**_85.02_** |**_89.48_** |**_94.96_** |**_88.61_** |**_83.78_** | **_89.28_** 
     
-   - dfg
+   - Number of failures on COCO testset per part of speech tag for vanilla CLIP and 3VL. 3VL improves by more than 50% on verbs(VERB) and by 46% on adpositions(ADP).
+
+      | Model       | NOUN       | ADP        | VERB     | ADJ   |
+      | ------------|:----------:| ----------:|---------:|------:|
+      | CLIP        | 3104       | 2927       | 1612     | 913
+      | 3VL         | **_1976_** | **_1575_** |**_780_** |**_612_**
 
 ### Downstream tasks
 
