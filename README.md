@@ -203,12 +203,12 @@ In the table below we report Top-1 accuracy results on VL-Checklist with four su
    - (**iii**) "**_WN+LLM prompt+mask_**" - Incremental tree, FLAN-T5 prompt for opposites, FLAN-T5 mask completion if opposite doesn’t exist and WordNet replacement if mask completion did not generate a word with a different meaning.
    - (**iv**) "**_WN+LLM prompt+mask_**" - Incremental tree, FLAN-T5 prompt for opposites, and WordNet replacement if the opposite does not exist.
 
- Tree Method    |Att color      |Att material      |Att size      |Att action       |Att state      |Rel action     |Rel spatial      
-|---------|:---------:|----------:|----------:|-----------:|----------:|----------:|----------:|
-|1        |72.70       |78.42      |69.28      |78.81       |70.99      |78.54      | 74.10     |
-|2        |72.99       |79.51      |69.24      |79.81       |72.90      |79.04      | 74.49     |
-|3        |73.27       |79.43      |68.68      |80.97       |72.79      |80.99      | 78.55     |
-|unlimited|**_75.57_** |**_82.63_**|**_70.72_**|**_81.10_**|**_75.35_** |**_81.94_**|**_81.15_**|     
+ Tree Method    |Att color      |Att material      |Att size      |Att action       |Att state      |Rel action     |Rel spatial| Avg      
+|---------|:---------:|----------:|----------:|-----------:|----------:|----------:|----------:|----:
+|1        |70.54      |75.79      |69.72      |75.95       |70.46      |81.81      | 73.94     |74.03
+|2        |74.41      |79.23      |70.13      |78.12       |71.63      |**_83.81_**| 75.70     |76.15
+|3        |72.31      |77.53      |69.98      |76.69       |69.39      |83.43      | 76.87     |75.17
+|unlimited|**_75.57_**|**_82.63_**|**_70.72_**|**_81.10_**|**_75.35_** |81.94      |**_81.15_**|**_78.35_**     
    
    
 3. sdf
