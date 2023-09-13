@@ -38,15 +38,15 @@ technique allows for rich exploration of the text space using several levels of 
    (using the caption: **"several people standing in a green field together while flying kytes"** as an example. see figure above)
    
    - The first level of the tree will contain the first noun phrase as its positive text
-     (i.e. "several people").
+     (i.e. **"several people"**).
    - The second level of the tree will contain the text of the first and second noun phrases concatenated with some connecting word like 'and'
-     (i.e. "several people and a green field").
+     (i.e. **"several people and a green field"**).
    - The Third level of the tree will contain the text of the original caption from the start until the end of the second noun phrase
-     (e.g. "several people standing in a green field").
+     (e.g. **"several people standing in a green field"**).
    - if more noun phrases exist in the original caption then in a similar way the next levels of the tree will contain the text of previous nouns
      phrases concatenated to the current noun phrase with a word like 'and', and the original caption from the start until the end of the current noun phrase
    - finally, the last level of the tree will contain the text of the full original caption
-      (i.e. "several people standing in a green field together while flying kytes").
+      (i.e. **"several people standing in a green field together while flying kytes"**).
      
 4) Next, for each positive sub-caption we generate one negative caption for each Noun, Adjective, Adposition, and Verb in the sub-caption.
 
