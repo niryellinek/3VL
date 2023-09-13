@@ -160,7 +160,7 @@ We show here results of several downstream tasks with the Original CLIP model re
 >tree at the level in which the model failed, with extra generated positive and negative words and check model image-text matching probability for all these words.
 
 <p align="center">
-<img src="docs/tree_expand_1.jpg" width="800px"/>  
+<img src="docs/tree_expand_2.jpg" width="800px"/>  
 <br>
 Example of Caption tree expansion after failed adposition
 </p>
