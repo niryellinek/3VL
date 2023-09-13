@@ -65,7 +65,7 @@ technique allows for rich exploration of the text space using several levels of 
 In each negative generation we replace one word of the positive caption, either a Noun, Adjective, Adposition, or Verb. 
 Where each negative word is generated as:
 1. An opposite (Antonym) of the positive word using FLAN-T5 with prompt (e.g. "find an opposite for the word:
-...”).
+<>”).
 2.  If an opposite is not found then we generate a co-hyponym[^1] of the positive word using WordNet.
 3.  If a co-hyponym[^1] is not found then we generate a word to fill the masked positive word using    FLAN-T5 (the token 'extra_id_0' replaces the positive word in prompt).
 
@@ -154,8 +154,6 @@ We show here results of several downstream tasks with the Original CLIP model re
          | 3VL         | **_57.2_**       | **_74.7_**       |
 
    
-3. Image captioning using ClipCap[[2]](#2)
-
 ### Using 3VL for interpretability
 >To offer extra insight into model decision, we expand the caption
 >tree at the level in which the model failed, with extra generated positive and negative words and check model image-text matching probability for all these words.
@@ -175,7 +173,7 @@ Original Caption tree
 
 ## Ablations
 
-1. Top-1 accuracy on VL-Checklist when constraining **3VL** tree to max depth        
+1. **Top-1 accuracy on VL-Checklist when constraining **3VL** tree to max depth**
 
  Depth    |Att color      |Att material      |Att size      |Att action       |Att state      |Rel action     |Rel spatial      
 |---------|:---------:|----------:|----------:|-----------:|----------:|----------:|----------:|
@@ -184,7 +182,36 @@ Original Caption tree
 |3        |73.27       |79.43      |68.68      |80.97       |72.79      |80.99      | 78.55     |
 |unlimited|**_75.57_** |**_82.63_**|**_70.72_**|**_81.10_**|**_75.35_** |**_81.94_**|**_81.15_**|
 
+2. **Caption Tree Variants**
+   
+>In the tree training process, we have explored many variants of caption tree structure formation that can be used with 3VL, different negatives generation methods and their combinations.
+>   - **Tree structures.** We explored two main tree structures: 
+>      - (**i**) basic tree structure (**_"Basic"_**) where each noun phrase appears alone in different tree levels and the full caption in the last tree level
+>        (**e.g.** for the above example we will get a tree with 3 levels. **_"several people"_**  in the first level, **_"a green field"_** in the second level, and **_"several people standing in a green field together while flying kytes"_** in the third level)
+>      - (**ii**) incremental tree structure (**_"Incremental"_**) where each noun phrase is prepended once with previous tree level text only and once with previous tree level text plus the text that connects to the current noun phrase (verbs and adpositions).
+>        (**e.g.** for the above example we will get a tree with 3 levels. **_"several people"_**  in the first level, **_"several people and a green field"_** in the second level, , **_"several people standing in a green field"_** in the third level, and **_"several people standing in a green field together while flying kytes"_** in the fourth level)
 
+>   - **Negatives generation.** We explored three main methods:
+>      - (**i**) using WordNet (**_"WN"_**) replace nouns and verbs with co-hyponyms and replace adjectives and adpositions with antonyms or with random adjective or adposition.
+>      - (**ii**) **_"LLM prompt"_** - we generate co-hyponyms, antonyms and random adjective or adposition with prompt to FLAN-T5 (e.g., "find an opposite for the word: <>").
+>      - (**iii**) LLM mask completion (**_"LLM mask"_**) - generates a negative word by replacing a positive word with a mask token and passing it to FLAN-T5 LLM for mask completion.
+>        Other variants included also replacing only nouns or verbs with mask completion.
+
+In the table below we report Top-1 accuracy results on VL-Checklist with four such tree variants.
+     - (**i**) "**_Basic WN_**" - Basic tree with WordNet replacement
+     - (**ii**) "**_Incremental WN_**" - Incremental tree structure with WordNet replacement.
+     - (**iii**) "**_WN+LLM prompt+mask_**" - Incremental tree, FLAN-T5 prompt for opposites, FLAN-T5 mask completion if opposite doesn’t exist and WordNet replacement if mask completion did not generate a word with a different meaning.
+     - (**iv**) "**_WN+LLM prompt+mask_**" - Incremental tree, FLAN-T5 prompt for opposites, and WordNet replacement if the opposite does not exist.
+
+ Tree Method    |Att color      |Att material      |Att size      |Att action       |Att state      |Rel action     |Rel spatial      
+|---------|:---------:|----------:|----------:|-----------:|----------:|----------:|----------:|
+|1        |72.70       |78.42      |69.28      |78.81       |70.99      |78.54      | 74.10     |
+|2        |72.99       |79.51      |69.24      |79.81       |72.90      |79.04      | 74.49     |
+|3        |73.27       |79.43      |68.68      |80.97       |72.79      |80.99      | 78.55     |
+|unlimited|**_75.57_** |**_82.63_**|**_70.72_**|**_81.10_**|**_75.35_** |**_81.94_**|**_81.15_**|     
+   
+   
+3. sdf
 
 ### User study
 
@@ -193,6 +220,3 @@ Original Caption tree
 Timo L ̈uddecke and Alexander Ecker, “Image segmentation using text and image prompts,” in Proceedings of
 the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), June 2022, pp. 7086–7096.
 
-<a id="2">[2]</a> 
-Ron Mokady, Amir Hertz, and Amit H Bermano, “Clipcap: Clip prefix for image captioning,” arXiv preprint
-arXiv:2111.09734, 2021.
