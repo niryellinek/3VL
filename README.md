@@ -90,11 +90,11 @@ For each image-caption pair, we first create a caption tree. Then, for each leve
 ## Results
 
    - Top-1 accuracy on VL-Checklist VG Object dataset
-Model    |Location Center      |Location Margin      |Location Mid      |Size Large       |Size Medium      |Size Small     |Avg      
-|---------|:---------:|----------:|----------:|-----------:|----------:|----------:|----------:|----:
-|CLIP        |86.95      |77.75      |72.75       |85.50      |80.50      | 70.60     |79.01
-|RB+LLM Negs |91.70      |83.20      |78.90      |90.30       |84.55      |77.00     |84.34
-|3VL        |**_93.82**_      |**_85.02_**      |**_89.48_**      |**_94.96_**       |**_88.61_**      |**_83.78_**      | **_89.28_**     
+     Model    |Location Center      |Location Margin   |Location Mid      |Size Large       |Size Medium     |Size Small     |Avg
+     ---------|:---------:|----------:|----------:|-----------:|----------:|----------:|----------:|----:
+      CLIP        |86.95      |77.75      |72.75       |85.50      |80.50      | 70.60     |79.01
+      RB+LLM Negs |91.70      |83.20      |78.90      |90.30       |84.55      |77.00     |84.34
+      3VL        |**_93.82**_      |**_85.02_**      |**_89.48_**      |**_94.96_**       |**_88.61_**      **_83.78_**      | **_89.28_**     
     
    - dfg
 
