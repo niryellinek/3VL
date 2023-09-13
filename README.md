@@ -154,7 +154,7 @@ We show here results of several downstream tasks with the Original CLIP model re
          | 3VL         | **_57.2_**       | **_74.7_**       |
 
    
-3. 
+3. Image captioning using ClipCap[[2]](#2)
 
 ### Using 3VL for interpretability
 >To offer extra insight into model decision, we expand the caption
@@ -192,3 +192,7 @@ Original Caption tree
 <a id="1">[1]</a> 
 Timo L ̈uddecke and Alexander Ecker, “Image segmentation using text and image prompts,” in Proceedings of
 the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), June 2022, pp. 7086–7096.
+
+<a id="2">[2]</a> 
+Ron Mokady, Amir Hertz, and Amit H Bermano, “Clipcap: Clip prefix for image captioning,” arXiv preprint
+arXiv:2111.09734, 2021.
