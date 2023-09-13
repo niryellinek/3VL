@@ -198,10 +198,10 @@ Original Caption tree
 >        Other variants included also replacing only nouns or verbs with mask completion.
 
 In the table below we report Top-1 accuracy results on VL-Checklist with four such tree variants.
-     - (**i**) "**_Basic WN_**" - Basic tree with WordNet replacement
-     - (**ii**) "**_Incremental WN_**" - Incremental tree structure with WordNet replacement.
-     - (**iii**) "**_WN+LLM prompt+mask_**" - Incremental tree, FLAN-T5 prompt for opposites, FLAN-T5 mask completion if opposite doesn’t exist and WordNet replacement if mask completion did not generate a word with a different meaning.
-     - (**iv**) "**_WN+LLM prompt+mask_**" - Incremental tree, FLAN-T5 prompt for opposites, and WordNet replacement if the opposite does not exist.
+   - (**i**) "**_Basic WN_**" - Basic tree with WordNet replacement
+   - (**ii**) "**_Incremental WN_**" - Incremental tree structure with WordNet replacement.
+   - (**iii**) "**_WN+LLM prompt+mask_**" - Incremental tree, FLAN-T5 prompt for opposites, FLAN-T5 mask completion if opposite doesn’t exist and WordNet replacement if mask completion did not generate a word with a different meaning.
+   - (**iv**) "**_WN+LLM prompt+mask_**" - Incremental tree, FLAN-T5 prompt for opposites, and WordNet replacement if the opposite does not exist.
 
  Tree Method    |Att color      |Att material      |Att size      |Att action       |Att state      |Rel action     |Rel spatial      
 |---------|:---------:|----------:|----------:|-----------:|----------:|----------:|----------:|
