@@ -151,11 +151,11 @@ We show here results of several downstream tasks with the Original CLIP model re
          | ------------|:----------------:| ----------------:|
          | CLIP        | 54.8             | 73.2             | 
          | RB+LLM Negs | 55.2             | 73.4             | 
-         | 3VL         | **_57.2_**        | **_74.7_**       |
+         | 3VL         | **_57.2_**       | **_74.7_**       |
    
 3. 
 
-### Using 3VL for interpretability of VLMs
+### Using 3VL for interpretability
 >To offer extra insight into model decision, we expand the caption
 >tree at the level in which the model failed, with extra generated positive and negative words and check model image-text matching probability for all these words.
 
@@ -175,6 +175,16 @@ Example of Caption tree expansion after failed adposition
 
 ## Ablations
 
+1. Top-1 accuracy on VL-Checklist when constraining **3V**L tree to max depth
+
+         
+         | Depth   | Att       | Att       | Att       | Att        | Att       | Rel       | Rel       |
+         |         |color      | material  | size      | action     | state     | action    | spatial   |
+         |---------|:---------:|----------:|----------:|-----------:|----------:|----------:|----------:|
+         |1        |72.70      |78.42      |69.28      |78.81       |70.99      |78.54      |74.10      |
+         |2        |72.99      |79.51      |69.24      |79.81       |72.90      |79.04      |74.49      |
+         |3        |73.27      |79.43      |68.68      |80.97       |72.79      |80.99      |78.55      |
+         |unlimited|**_75.57_**|**_82.63_**|**_70.72_**| **_81.10_**|**_75.35_**|**_81.94_**|**_81.15_**|
 
 ## References
 <a id="1">[1]</a> 
