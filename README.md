@@ -92,7 +92,7 @@ For each image-caption pair, we first create a caption tree. Then, for each leve
    - Top-1 accuracy on VL-Checklist VG Object dataset
 
 
-      Model                   | Location Center | Location Margin | Location Mid | Size Large |Size Medium |Size Small |Avg      
+  Model                  | Location Center | Location Margin | Location Mid | Size Large |Size Medium |Size Small |Avg      
 |------------------------|:---------:|----------:|----------:|-----------:|----------:|----------:|----------:
 |**_CLIP_**        |86.95       |77.75      |72.75       |85.50       |80.50       |70.60     | 79.01 
 |**_RB+LLM Negs_** |91.70       |83.20       |78.90       |90.30       |84.55       |77.00       |84.34
