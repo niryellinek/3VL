@@ -173,7 +173,7 @@ Example of Caption tree expansion after failed adposition
 ### User study
 
 
-## Ablations
+### Ablations
 
 1. Top-1 accuracy on VL-Checklist when constraining **3V**L tree to max depth
 
