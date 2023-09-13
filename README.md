@@ -152,6 +152,14 @@ We show here results of several downstream tasks with the Original CLIP model re
          | CLIP        | 54.8             | 73.2             | 
          | RB+LLM Negs | 55.2             | 73.4             | 
          | 3VL         | **_57.2_**       | **_74.7_**       |
+
+
+
+       Model       | R@1      | R@5        | R@10   
+          ------------|:--------:| ----------:|-------:
+          CLIP        | 67       | 89.5       | 68.08
+          RB+LLM Negs | 67       | 89.5       | 93.8
+          3VL         | **_74_** | **_93.5_** |**_96.1_**   
    
 3. 
 
