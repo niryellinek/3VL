@@ -182,7 +182,7 @@ Example of Caption tree expansion after failed adposition
           RB+LLM Negs | 67       | 89.5       | 93.8
           3VL         | **_74_** | **_93.5_** |**_96.1_**  
 
-1. Top-1 accuracy on VL-Checklist when constraining **3V**L tree to max depth
+1. Top-1 accuracy on VL-Checklist when constraining **3VL** tree to max depth
 
           
 
