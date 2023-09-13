@@ -153,13 +153,6 @@ We show here results of several downstream tasks with the Original CLIP model re
          | RB+LLM Negs | 55.2             | 73.4             | 
          | 3VL         | **_57.2_**       | **_74.7_**       |
 
-
-
-       Model       | R@1      | R@5        | R@10   
-          ------------|:--------:| ----------:|-------:
-          CLIP        | 67       | 89.5       | 68.08
-          RB+LLM Negs | 67       | 89.5       | 93.8
-          3VL         | **_74_** | **_93.5_** |**_96.1_**   
    
 3. 
 
@@ -183,13 +176,15 @@ Example of Caption tree expansion after failed adposition
 
 ### Ablations
 
-1. Top-1 accuracy on VL-Checklist when constraining **3V**L tree to max depth
-
-          Model       | R@1      | R@5        | R@10   
+ Model       | R@1      | R@5        | R@10   
           ------------|:--------:| ----------:|-------:
           CLIP        | 67       | 89.5       | 68.08
           RB+LLM Negs | 67       | 89.5       | 93.8
-          3VL         | **_74_** | **_93.5_** |**_96.1_**   
+          3VL         | **_74_** | **_93.5_** |**_96.1_**  
+
+1. Top-1 accuracy on VL-Checklist when constraining **3V**L tree to max depth
+
+          
 
       seperate line
 
