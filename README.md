@@ -228,11 +228,6 @@ In the table below we report Top-1 accuracy results on VL-Checklist with four su
 |**_WN+LLM prompt+mask(3VL)_**|**_75.57_**|**_82.63_**|**_70.72_**|**_81.10_**|**_75.35_** |81.94      |**_81.15_**|**_78.35_**  
 
 
-
-   
-   
-3. sdf
-
 ### User study
 
 ## References
