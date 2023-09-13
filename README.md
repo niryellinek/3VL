@@ -169,6 +169,7 @@ Example of Caption tree expansion after failed adposition
 <p align="center">
 <img src="docs/Elephant_tree.jpg" width="400px"/>  
 <br>
+Original Caption tree   
 </p>
 
 
