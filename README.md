@@ -172,15 +172,15 @@ Example of Caption tree expansion after failed adposition
 </p>
 
 
-
-
-### Ablations
-
  Model       | R@1      | R@5        | R@10   
           ------------|:--------:| ----------:|-------:
           CLIP        | 67       | 89.5       | 68.08
           RB+LLM Negs | 67       | 89.5       | 93.8
           3VL         | **_74_** | **_93.5_** |**_96.1_**  
+
+### Ablations
+
+
 
 1. Top-1 accuracy on VL-Checklist when constraining **3VL** tree to max depth
 
