@@ -232,9 +232,9 @@ In the table below we report Top-1 accuracy results on VL-Checklist with four su
 
  Model    |Att color      |Att material      |Att size      |Att action       |Att state      |Rel action     |Avg      
 |---------|:---------:|----------:|----------:|-----------:|----------:|----------:|----------:|----:
-|**_Basic WN_**        |70.54      |75.79      |69.72      |75.95       |70.46      |81.81      | 73.94     
-|**_Incremental WN_**        |74.41      |79.23      |70.13      |78.12       |71.63      |**_83.81_**     |76.15
-|**_WN+LLM prompt+mask_**        |72.31      |77.53      |69.98      |76.69       |69.39      |83.43      | 76.87     
+|**_Basic WN_**           |70.54      |75.79      |69.72      |75.95       |70.46      |81.81      | 73.94     
+|**_Incremental WN_**     |74.41      |79.23      |70.13      |78.12       |71.63      |**_83.81_**|76.15
+|**_WN+LLM prompt+mask_** |72.31      |77.53      |69.98      |76.69       |69.39      |83.43      | 76.87     
 
    
    
