@@ -151,7 +151,7 @@ We show here results of several downstream tasks with the Original CLIP model re
          | ------------|:----------------:| ----------------:|
          | CLIP        | 54.8             | 73.2             | 
          | RB+LLM Negs | 55.2             | 73.4             | 
-         | 3VL         | **57.2_**        | **_74.7_**       |
+         | 3VL         | **_57.2_**        | **_74.7_**       |
    
 3. 
 
@@ -163,6 +163,11 @@ We show here results of several downstream tasks with the Original CLIP model re
 <img src="docs/tree_expand_2.jpg" width="800px"/>  
 <br>
 Example of Caption tree expansion after failed adposition
+</p>
+
+<p align="center">
+<img src="docs/Elephant_tree.jpg" width="800px"/>  
+<br>
 </p>
 
 ### User study
