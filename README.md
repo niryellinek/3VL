@@ -35,7 +35,8 @@ technique allows for rich exploration of the text space using several levels of 
 2) Then, we reconstruct the full caption hierarchically to get a positive sub-caption for each level in the tree
    in the following way:
 
-   for the caption: "several people standing in a green field together while flying kytes"
+   (using the caption: **"several people standing in a green field together while flying kytes"** as an example. see figure above)
+   
    - The first level of the tree will contain the first noun phrase as its positive text
      (i.e. "several people").
    - The second level of the tree will contain the text of the first and second noun phrases concatenated with some connecting word like 'and'
