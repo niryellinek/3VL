@@ -177,8 +177,14 @@ Example of Caption tree expansion after failed adposition
 
 1. Top-1 accuracy on VL-Checklist when constraining **3V**L tree to max depth
 
+      | Model       | R@1      | R@5        | R@10   |
+         | ------------|:--------:| ----------:|-------:|
+         | CLIP        | 67       | 89.5       | 68.08
+         | RB+LLM Negs | 67       | 89.5       | 93.8
+         | 3VL         | **_74_** | **_93.5_** |**_96.1_**   
+
          
-         | Depth   | Att color      | Att material      | Att size      | Att action       | Att state      | Rel action     | Rel spatial      |
+      | Depth   | Att color      | Att material      | Att size      | Att action       | Att state      | Rel action     | Rel spatial      |
          | ---------|:---------:| ----------:| ----------:| -----------:| ----------:| ----------:| ----------:|
          | 1         | 72.70       | 78.42      | 69.28      | 78.81       | 70.99      | 78.54      | 74.10      |
          | 2         | 72.99       | 79.51      | 69.24      | 79.81       | 72.90      | 79.04      | 74.49      |
@@ -187,7 +193,5 @@ Example of Caption tree expansion after failed adposition
 
 ## References
 <a id="1">[1]</a> 
-Timo L ̈uddecke and Alexander Ecker, “Image segmen-
-tation using text and image prompts,” in Proceedings of
-the IEEE/CVF Conference on Computer Vision and Pat-
-tern Recognition (CVPR), June 2022, pp. 7086–7096.
+Timo L ̈uddecke and Alexander Ecker, “Image segmentation using text and image prompts,” in Proceedings of
+the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), June 2022, pp. 7086–7096.
