@@ -104,6 +104,7 @@ For each image-caption pair, we first create a caption tree. Then, for each leve
       | Model       | NOUN       | ADP        | VERB     | ADJ   |
       | ------------|:----------:| ----------:|---------:|------:|
       | CLIP        | 3104       | 2927       | 1612     | 913
+      | NegCLIP     | 2743       | 1989       | 900      | 695
       | 3VL         | **_1976_** | **_1575_** |**_780_** |**_612_**
 
 ### Downstream tasks
