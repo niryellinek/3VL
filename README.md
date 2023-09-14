@@ -96,15 +96,17 @@ For each image-caption pair, we first create a caption tree. Then, for each leve
   Model                  | Location Center | Location Margin | Location Mid | Size Large |Size Medium |Size Small |Avg      
 |------------------------|:---------:|----------:|----------:|-----------:|----------:|----------:|----------:
 |**_CLIP_**        |86.95       |77.75      |72.75       |85.50       |80.50       |70.60     | 79.01 
+|**_NegCLIP_**        |89.61       |72.64      |81.88       |90.33       |80.82     | 73.95     | 81.54 
 |**_RB+LLM Negs_** |91.70       |83.20       |78.90       |90.30       |84.55       |77.00       |84.34
 |**_3VL_**         |**_93.82_** |**_85.02_** |**_89.48_** |**_94.96_** |**_88.61_** |**_83.78_** | **_89.28_** 
     
-   - Number of failures on COCO testset per part of speech tag for vanilla CLIP and 3VL. 3VL improves by more than 50% on verbs(VERB) and by 46% on adpositions(ADP).
+   - Number of failures on COCO testset per part of speech tag for vanilla CLIP, NegCLIP and 3VL. 3VL improves by more than 50% on verbs(VERB) and by 46% on adpositions(ADP).
 
       | Model       | NOUN       | ADP        | VERB     | ADJ   |
       | ------------|:----------:| ----------:|---------:|------:|
-      | CLIP        | 3104       | 2927       | 1612     | 913
-      | 3VL         | **_1976_** | **_1575_** |**_780_** |**_612_**
+      | **_CLIP_**        | 3104       | 2927       | 1612     | 913
+      | **_NegCLIP_**     | 2743       | 1989       | 900      | 695
+      | **_3VL_**         | **_1976_** | **_1575_** |**_780_** |**_612_**
 
 ### Downstream tasks
 
@@ -117,27 +119,27 @@ We report results of several downstream tasks with the Original CLIP model repla
     
          | Model       | R@1         | R@5         | R@10   |
          | ------------|:-----------:| -----------:|-------:|
-         | CLIP        | 32.54       | 57.7        | 68.08
-         | RB+LLM Negs | 32.56       | 57.84       | 68.06
-         | 3VL         | **_33.72_** | **_62.08_** |**_73.12_**
+         | **_CLIP_**        | 32.54       | 57.7        | 68.08
+         | **_RB+LLM Negs_** | 32.56       | 57.84       | 68.06
+         | **_3VL_**         | **_33.72_** | **_62.08_** |**_73.12_**
     
      - Text2Image on COCO 2017 validation set:
 
 
          | Model       | R@1         | R@5         | R@10   |
          | ------------|:-----------:| -----------:|-------:|
-         | CLIP        | 28.66       | 53.04       | 64.44
-         | RB+LLM Negs | 28.58       | 53.12       | 64.42
-         | 3VL         | **_36.54_** | **_63.32_** |**_74.48_**
+         |  **_CLIP_**        | 28.66       | 53.04       | 64.44
+         | **_RB+LLM Negs_** | 28.58       | 53.12       | 64.42
+         | **_3VL_**         | **_36.54_** | **_63.32_** |**_74.48_**
     
      - Image2Text on FLICKR test set:
 
   
          | Model       | R@1      | R@5        | R@10   |
          | ------------|:--------:| ----------:|-------:|
-         | CLIP        | 69.5     | 90.1       | 95
-         | RB+LLM Negs | 58.9     | 86.3       | 92.5
-         | 3VL         | **_71_** | **_91.1_** |**_95.3_**
+         | **_CLIP_**        | 69.5     | 90.1       | 95
+         | **_RB+LLM Negs_** | 58.9     | 86.3       | 92.5
+         | **_3VL_**         | **_71_** | **_91.1_** |**_95.3_**
   
    
      - Text2Image on FLICKR test set:
@@ -145,9 +147,9 @@ We report results of several downstream tasks with the Original CLIP model repla
    
          | Model       | R@1      | R@5        | R@10   |
          | ------------|:--------:| ----------:|-------:|
-         | CLIP        | 67       | 89.5       | 68.08
-         | RB+LLM Negs | 67       | 89.5       | 93.8
-         | 3VL         | **_74_** | **_93.5_** |**_96.1_**   
+         | **_CLIP_**        | 67       | 89.5       | 68.08
+         | **_RB+LLM Negs_** | 67       | 89.5       | 93.8
+         | **_3VL_**         | **_74_** | **_93.5_** |**_96.1_**   
 
    
 2. Image segmentation using SegCLIP[[1]](#1)
@@ -157,18 +159,18 @@ We report results of several downstream tasks with the Original CLIP model repla
     
          | Model       | IoU<sub>FG</sub> | IoU<sub>BIN</sub>| 
          | ------------|:----------------:| ----------------:|
-         | CLIP        | 52.4             | 71.7             | 
-         | RB+LLM Negs | 51.7             | 69.8             | 
-         | 3VL         | **_53.4_**       | **_72.1_**       |
+         | **_CLIP_**        | 52.4             | 71.7             | 
+         | **_RB+LLM Negs_** | 51.7             | 69.8             | 
+         | **_3VL_**         | **_53.4_**       | **_72.1_**       |
       
     
      - Segmentation performance on COCO:
 
          | Model       | IoU<sub>FG</sub> | IoU<sub>BIN</sub>| 
          | ------------|:----------------:| ----------------:|
-         | CLIP        | 54.8             | 73.2             | 
-         | RB+LLM Negs | 55.2             | 73.4             | 
-         | 3VL         | **_57.2_**       | **_74.7_**       |
+         | **_CLIP_**        | 54.8             | 73.2             | 
+         | **_RB+LLM Negs_** | 55.2             | 73.4             | 
+         | **_3VL_**         | **_57.2_**       | **_74.7_**       |
 
    
 ### Using 3VL for interpretability
@@ -229,6 +231,24 @@ In the table below we report Top-1 accuracy results on VL-Checklist with four su
 
 
 ### User study
+>We have conducted a user study to asses the interpretability of 3VL compared to CLIP using relevancy maps generated from image-text pairs with
+HilaCAM. We compared the relevancy maps generated by 3VL and CLIP by letting users decide which image emphasizes a caption better. We randomly sampled 19 images from the VL-Checklist dataset. For each image we presented the original image on the right and the relevancy maps for
+CLIP and 3VL in a random order. A total of 37 respondents participated in the study and were asked ”which image better emphasizes the caption ..."  (a), (b) or neither. We found 3VL maps to be more explainable (51.67% percent of user choices were 3VL, 27.4% CLIP and 20.93% neither. Moreover, in 78.94% of the questions 3VL got the most votes).
+
+**_Visual examples from the user study:_**
+
+   -
+
+<p align="center">
+<img src="docs/user_study_1.PNG" width="600px"/>  
+<br>   
+</p>
+   
+   -
+
+
+
+
 
 ## References
 <a id="1">[1]</a> 
