@@ -120,7 +120,7 @@ We report results of several downstream tasks with the Original CLIP model repla
          | Model       | R@1         | R@5         | R@10   |
          | ------------|:-----------:| -----------:|-------:|
          | **_CLIP_**        | 32.54       | 57.7        | 68.08
-         | **_NegCLIP_** | 32.56       | 57.84       | 68.06
+         | **_RB+LLM Negs_** | 32.56       | 57.84       | 68.06
          | **_3VL_**         | **_33.72_** | **_62.08_** |**_73.12_**
     
      - Text2Image on COCO 2017 validation set:
@@ -128,18 +128,18 @@ We report results of several downstream tasks with the Original CLIP model repla
 
          | Model       | R@1         | R@5         | R@10   |
          | ------------|:-----------:| -----------:|-------:|
-         | CLIP        | 28.66       | 53.04       | 64.44
-         | RB+LLM Negs | 28.58       | 53.12       | 64.42
-         | 3VL         | **_36.54_** | **_63.32_** |**_74.48_**
+         |  **_CLIP_**        | 28.66       | 53.04       | 64.44
+         | **_RB+LLM Negs_** | 28.58       | 53.12       | 64.42
+         | **_3VL_**         | **_36.54_** | **_63.32_** |**_74.48_**
     
      - Image2Text on FLICKR test set:
 
   
          | Model       | R@1      | R@5        | R@10   |
          | ------------|:--------:| ----------:|-------:|
-         | CLIP        | 69.5     | 90.1       | 95
-         | RB+LLM Negs | 58.9     | 86.3       | 92.5
-         | 3VL         | **_71_** | **_91.1_** |**_95.3_**
+         | **_CLIP_**        | 69.5     | 90.1       | 95
+         | **_RB+LLM Negs_** | 58.9     | 86.3       | 92.5
+         | **_3VL_**         | **_71_** | **_91.1_** |**_95.3_**
   
    
      - Text2Image on FLICKR test set:
@@ -147,9 +147,9 @@ We report results of several downstream tasks with the Original CLIP model repla
    
          | Model       | R@1      | R@5        | R@10   |
          | ------------|:--------:| ----------:|-------:|
-         | CLIP        | 67       | 89.5       | 68.08
-         | RB+LLM Negs | 67       | 89.5       | 93.8
-         | 3VL         | **_74_** | **_93.5_** |**_96.1_**   
+         | **_CLIP_**        | 67       | 89.5       | 68.08
+         | **_RB+LLM Negs_** | 67       | 89.5       | 93.8
+         | **_3VL_**         | **_74_** | **_93.5_** |**_96.1_**   
 
    
 2. Image segmentation using SegCLIP[[1]](#1)
@@ -159,18 +159,18 @@ We report results of several downstream tasks with the Original CLIP model repla
     
          | Model       | IoU<sub>FG</sub> | IoU<sub>BIN</sub>| 
          | ------------|:----------------:| ----------------:|
-         | CLIP        | 52.4             | 71.7             | 
-         | RB+LLM Negs | 51.7             | 69.8             | 
-         | 3VL         | **_53.4_**       | **_72.1_**       |
+         | **_CLIP_**        | 52.4             | 71.7             | 
+         | **_RB+LLM Negs_** | 51.7             | 69.8             | 
+         | **_3VL_**         | **_53.4_**       | **_72.1_**       |
       
     
      - Segmentation performance on COCO:
 
          | Model       | IoU<sub>FG</sub> | IoU<sub>BIN</sub>| 
          | ------------|:----------------:| ----------------:|
-         | CLIP        | 54.8             | 73.2             | 
-         | RB+LLM Negs | 55.2             | 73.4             | 
-         | 3VL         | **_57.2_**       | **_74.7_**       |
+         | **_CLIP_**        | 54.8             | 73.2             | 
+         | **_RB+LLM Negs_** | 55.2             | 73.4             | 
+         | **_3VL_**         | **_57.2_**       | **_74.7_**       |
 
    
 ### Using 3VL for interpretability
