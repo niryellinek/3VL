@@ -104,9 +104,9 @@ For each image-caption pair, we first create a caption tree. Then, for each leve
 
       | Model       | NOUN       | ADP        | VERB     | ADJ   |
       | ------------|:----------:| ----------:|---------:|------:|
-      | CLIP        | 3104       | 2927       | 1612     | 913
-      | NegCLIP     | 2743       | 1989       | 900      | 695
-      | 3VL         | **_1976_** | **_1575_** |**_780_** |**_612_**
+      | **_CLIP_**        | 3104       | 2927       | 1612     | 913
+      | **_NegCLIP_**     | 2743       | 1989       | 900      | 695
+      | **_3VL_**         | **_1976_** | **_1575_** |**_780_** |**_612_**
 
 ### Downstream tasks
 
@@ -119,9 +119,9 @@ We report results of several downstream tasks with the Original CLIP model repla
     
          | Model       | R@1         | R@5         | R@10   |
          | ------------|:-----------:| -----------:|-------:|
-         | CLIP        | 32.54       | 57.7        | 68.08
-         | RB+LLM Negs | 32.56       | 57.84       | 68.06
-         | 3VL         | **_33.72_** | **_62.08_** |**_73.12_**
+         | **_CLIP_**        | 32.54       | 57.7        | 68.08
+         | **_NegCLIP_** | 32.56       | 57.84       | 68.06
+         | **_3VL_**         | **_33.72_** | **_62.08_** |**_73.12_**
     
      - Text2Image on COCO 2017 validation set:
 
