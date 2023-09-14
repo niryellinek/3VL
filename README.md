@@ -59,6 +59,7 @@ technique allows for rich exploration of the text space using several levels of 
    - In the third level we generate "several people gathered in a green field", "several people standing out a green field" (for the positive text "several people standing in a green field").
    - In the fourth level we generate "several people standing in a green field together while soaring kytes", "several people standing in a green field together while flying sales"
 (for the positive text "several people standing in a green field together while flying kytes").
+
      **_Note_** that our automated negatives generation method can generate grammatical errors sometimes
 
 ### Negatives generation
