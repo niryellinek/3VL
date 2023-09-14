@@ -237,11 +237,16 @@ CLIP and 3VL in a random order. A total of 37 respondents participated in the st
 
 **_Visual examples from the user study:_**
 
+   -
 
 <p align="center">
 <img src="docs/user_study_1.PNG" width="600px"/>  
 <br>   
 </p>
+   
+   -
+
+
 
 
 
