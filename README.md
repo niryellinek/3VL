@@ -48,7 +48,7 @@ technique allows for rich exploration of the text space using several levels of 
    - finally, the last level of the tree will contain the text of the full original caption
       (i.e. **"several people standing in a green field together while flying kytes"**).
      
-4) Next, for each positive sub-caption we generate one negative caption for each Noun, Adjective, Adposition, and Verb in the sub-caption.
+4) Next, for each positive sub-caption we generate one negative caption for each Noun, Adjective, Adposition, and Verb of the sub-caption.
 
    **_Note_** that we do not replace again words that appeared in previous tree levels. So information from a previous level flows without change.
 
