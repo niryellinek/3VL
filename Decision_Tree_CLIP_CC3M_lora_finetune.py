@@ -24,8 +24,12 @@ from torchvision.datasets import CocoCaptions
 from tqdm import tqdm
 from robustness.robustness.tools.breeds_helpers import ClassHierarchy
 from robustness.robustness.tools.breeds_helpers import setup_breeds
-from create_coarse_sentences import get_caption_tree, Node, expand_caption, plotly_plot_tree
-from lora.lib.CLIP.clip import *
+#from create_coarse_sentences import get_caption_tree, Node, expand_caption, plotly_plot_tree
+from create_coarse_sentences_debug import get_caption_tree, Node, expand_caption, plotly_plot_tree
+
+#from lora.lib.CLIP.clip import *
+#from hilaCAM_lora.lib.CLIP.clip import *
+import hilaCAM_CLIP.clip as clip
 from PIL import Image, ImageDraw, ImageFont
 import matplotlib.pyplot as plt
 import cv2
@@ -210,7 +214,11 @@ class DecisionTreeClipModel(nn.Module):
     
     vit_name = 'ViT-B/32'
     #self.load_model(base_name=vit_name, weight_name=checkpoint_file)
-    self.clip_model, self.preprocess = self.load_model(base_name=vit_name, lora_r=lora)
+    #load with lora lib
+    #self.clip_model, self.preprocess = self.load_model(base_name=vit_name, lora_r=lora)
+    #load with hilaCAM
+    self.clip_model, self.preprocess = clip.load(vit_name, device=device, jit=False)
+    self.clip_model = self.clip_model.to(device=device)
     #self.freeze_visual_head()
     self.clip_model = self.clip_model.float()
     #self.clip_model = clip_model.float()
@@ -317,7 +325,7 @@ class DecisionTreeClipModel(nn.Module):
         self.label_path_dict[class_num] = path
   
 
-  def get_encoded_prompts(self, node_names):
+  def get_encoded_prompts(self, node_names, req_grad=False):
     #make sure prompts are in the same order of HIER_NODE_NUM(which is the node label)
     #num_nodes = len(all_nodes)
     #node_names = [node.prompt for node in all_nodes ]
@@ -325,6 +333,9 @@ class DecisionTreeClipModel(nn.Module):
     prompts = [f'a photo of {name}' for name in node_names]
 
     tokenized_prompts = torch.cat([clip.tokenize(p) for p in prompts]).to(device=device)
+    #if req_grad:
+    #  tokenized_prompts = tokenized_prompts.float()
+    #  tokenized_prompts.requires_grad = True
     #tokenized_prompts.double()
     #print(f'tokenized_prompts.type(): {tokenized_prompts.type()}')
     
@@ -481,8 +492,9 @@ class DecisionTreeClipModel(nn.Module):
     
     root, true_label_path, all_tree_nodes, edges, node_texts = get_caption_tree(caption)
 
-    probs_matrix, _ = self.get_probs_matrix(x, true_label_path, all_tree_nodes)
-    prob_values, predictions = probs_matrix.topk(1)
+    with torch.set_grad_enabled(True):
+      probs_matrix, _ = self.get_probs_matrix(x, true_label_path, all_tree_nodes, req_grad=True)
+      prob_values, predictions = probs_matrix.topk(1)
     #print(f'\nprob_values: {prob_values}\npredictions: {predictions}\n')
     #print(f'\ntrue_label_path: {true_label_path}\n')
     
@@ -539,7 +551,8 @@ class DecisionTreeClipModel(nn.Module):
           with torch.set_grad_enabled(True):
             #HilaCAM
             #texts = [predicted_caption, correct_caption]
-            #get_image_text_relevance(img_path, texts, self.clip_model, self.preprocess)
+            texts = expanded_captions
+            get_image_text_relevance(img_path, texts, self.clip_model, self.preprocess)
             x = x.to(device=device)
             x.requires_grad = True
             loss_fn = nn.NLLLoss(reduction='none')
@@ -635,10 +648,10 @@ class DecisionTreeClipModel(nn.Module):
     return similarity
 
 
-  def get_probs_matrix(self, images, true_label_path, all_tree_nodes):
+  def get_probs_matrix(self, images, true_label_path, all_tree_nodes, req_grad=False):
     
     node_names = [node.prompt for node in all_tree_nodes ]
-    self.encoded_prompts = self.get_encoded_prompts(node_names)
+    self.encoded_prompts = self.get_encoded_prompts(node_names,req_grad)
     #print(f'\nencoded_prompts.grad_fn: {self.encoded_prompts.grad_fn}\n')
 
     similarity = self.get_cosine_similarity(images,self.encoded_prompts)
@@ -928,11 +941,12 @@ def DT_CLIP_CC3M_train(DT_CLIP_model, num_epochs, data_loader, criterion, optimi
   #PATH = '/mnt5/nir/CLIP/interpret/DT_CLIP_CC3M_checkpoint_epoch_0020.pt.tar'
   #PATH = 'DT_CLIP_COCO_checkpoint_epoch_0001.pt.tar'
   #PATH = 'DT_LoRA_CLIP_COCO_checkpoint_epoch_0007.pt.tar'
+  PATH = 'DT_LoRA_CLIP_state_dict_COCO_checkpoint_epoch_0005.pt.tar'
   
-  #checkpoint = torch.load(PATH)
-  #DT_CLIP_model.load_state_dict(checkpoint['state_dict'])
-  #optimizer.load_state_dict(checkpoint['optimizer'])
-  #loaded_epoch = checkpoint['completed_epoch']
+  checkpoint = torch.load(PATH)
+  DT_CLIP_model.clip_model.load_state_dict(checkpoint['state_dict'])
+  optimizer.load_state_dict(checkpoint['optimizer'])
+  loaded_epoch = checkpoint['completed_epoch']
   ##loss = checkpoint['loss']
   print(f'DT_CLIP_train: loaded epoch: {loaded_epoch}')
 
@@ -951,7 +965,7 @@ def DT_CLIP_CC3M_train(DT_CLIP_model, num_epochs, data_loader, criterion, optimi
       #print(f'captions: {captions}')
       #print(f'captions[0]: {captions[0]}')
       #print(f'captions[0][0]: {captions[0][0]}')
-      root, true_label_path, all_tree_nodes = get_caption_tree(captions[0][0])
+      root, true_label_path, all_tree_nodes, edges ,node_texts = get_caption_tree(captions[0][0])
       #DT_CLIP_model.encoded_prompts = DT_CLIP_model.get_encoded_prompts(all_tree_nodes)
 
       #caption_tree = get_caption_tree(captions)
@@ -1007,11 +1021,11 @@ def DT_CLIP_CC3M_train(DT_CLIP_model, num_epochs, data_loader, criterion, optimi
                 )):
       
         # Saving checkpoints.
-        checkpoint_dict = {
-              "completed_epoch": completed_epoch,
-              "state_dict": DT_CLIP_model.state_dict(),
-              "optimizer": optimizer.state_dict(),
-        }
+        #checkpoint_dict = {
+        #      "completed_epoch": completed_epoch,
+        #      "state_dict": DT_CLIP_model.state_dict(),
+        #      "optimizer": optimizer.state_dict(),
+        #}
 
         # Save only clip_model checkpoints
         checkpoint_dict = {
@@ -1052,7 +1066,8 @@ def check_accuracy(loader, DT_CLIP_model):
             #pil_image.show()
             #pil_image.save("/mnt5/nir/CLIP/interpret/tmp.jpg")
             #exit(0)
-            predictions, labels = DT_CLIP_model.classify_example(full_path[0], images,captions[0][0], print_all=False, print_incorrect=True)
+            with torch.set_grad_enabled(True):
+              predictions, labels = DT_CLIP_model.classify_example(full_path[0], images,captions[0][0], print_all=False, print_incorrect=True)
                         
             num_correct += (predictions == labels).sum()
             num_samples += labels.size(0)
@@ -1116,7 +1131,7 @@ def main():
     #num_imagenet_classes = len(hier.LEAF_IDS)
     #DT_CLIP_model = DecisionTreeClipModel(clip_model)
     DT_CLIP_model = DecisionTreeClipModel(lora=1)
-    
+    DT_CLIP_model = DT_CLIP_model.to(device)
 
     #load_and_save_clip_model_state_dict(DT_CLIP_model)
     #exit(0)
@@ -1216,11 +1231,12 @@ def main():
     #print(f"Accuracy on training set: {train_accuracy*100:.2f}%")
 
     #PATH = 'DT_CLIP_COCO_checkpoint_epoch_0004.pt.tar'
-    PATH = 'DT_LoRA_CLIP_COCO_checkpoint_epoch_0005.pt.tar'
+    #PATH = 'DT_LoRA_CLIP_COCO_checkpoint_epoch_0005.pt.tar'
+    PATH = 'DT_LoRA_CLIP_state_dict_COCO_checkpoint_epoch_0005.pt.tar'
     
-    checkpoint = torch.load(PATH, map_location=torch.device(device))
-    DT_CLIP_model.load_state_dict(checkpoint['state_dict'])
-    print(f'loaded checkpoint: {PATH}')
+    #checkpoint = torch.load(PATH, map_location=torch.device(device))
+    #DT_CLIP_model.clip_model.load_state_dict(checkpoint['state_dict'])
+    #print(f'loaded checkpoint: {PATH}')
     print(f'starting test set check_accuracy')
     test_accuracy = check_accuracy(test_loader, DT_CLIP_model)
     

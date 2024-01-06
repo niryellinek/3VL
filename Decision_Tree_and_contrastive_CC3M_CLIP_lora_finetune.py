@@ -33,7 +33,7 @@ from robustness.robustness.tools.breeds_helpers import setup_breeds
 #os.environ['TOKENIZERS_PARALLELISM'] = 'false'
 
 import json
-from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
+#from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
 import string
 #from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, T5Tokenizer, T5ForConditionalGeneration
 import random
@@ -1339,9 +1339,11 @@ def DT_Contrastive_CLIP_train(DT_CLIP_model, num_epochs, data_loader, tree_crite
 
   # PATH = '/mnt5/nir/CLIP/interpret/CC3M_DT_0.5_tree6_with_random_shuffle_LoRA_1_contrast_LR_3e6_checkpoint_epoch_0000_batch_0004.pt.tar'
 
-  PATH = '/mnt5/nir/CLIP/interpret/CC3M_DT_0.5_tree6_with_nouns_shuffle_LoRA_1_contrast_LR_3e6_checkpoint_epoch_0000_batch_0011.pt.tar'
+  #PATH = '/mnt5/nir/CLIP/interpret/CC3M_DT_0.5_tree6_with_nouns_shuffle_LoRA_1_contrast_LR_3e6_checkpoint_epoch_0000_batch_0011.pt.tar'
 
   # PATH = '/mnt5/nir/CLIP/interpret/CC3M_DT_0.5_tree6_with_all_shuffle_LoRA_1_contrast_LR_3e6_checkpoint_epoch0000_batch_0001.pt.tar'
+
+  PATH = '/mnt5/nir/CLIP/interpret/SYN_CC3M_caption6_LoRA_1_LR_3e6_checkpoint_epoch_0002_batch_0025.pt.tar'
 
 
   
@@ -1356,14 +1358,20 @@ def DT_Contrastive_CLIP_train(DT_CLIP_model, num_epochs, data_loader, tree_crite
   # print(f'DT_Contrastive_CLIP_train: start from scratch (epoch: {loaded_epoch})')
 
   tree_loss_weight = 0.5
+  tree_func = get_caption_tree6
+
+  print(f'train with lora_rank: {DT_CLIP_model.lora}, tree_loss_weight: {tree_loss_weight}, tree_func: {tree_func}')
+
   # print(f'train with lora_rank: {DT_CLIP_model.lora}, tree_loss_weight: {tree_loss_weight}, get_caption_tree6: flan t5 opposites if exist otherwise co-hyponym.')
   # print(f'train with lora_rank: {DT_CLIP_model.lora}, tree_loss_weight: {tree_loss_weight}, get_caption_tree6_with_random_shuffle: flan t5 opposites if exist otherwise co-hyponym. with random shuffle')
   # print(f'train with lora_rank: {DT_CLIP_model.lora}, tree_loss_weight: {tree_loss_weight}, get_caption_tree6_with_all_shuffles: flan t5 opposites if exist otherwise co-hyponym. with all shuffle')
-  print(f'train with lora_rank: {DT_CLIP_model.lora}, tree_loss_weight: {tree_loss_weight}, get_caption_tree6_with_noun_adj_shuffle: flan t5 opposites if exist otherwise co-hyponym. with nouns shuffle')
+  #print(f'train with lora_rank: {DT_CLIP_model.lora}, tree_loss_weight: {tree_loss_weight}, get_caption_tree6_with_noun_adj_shuffle: flan t5 opposites if exist otherwise co-hyponym. with nouns shuffle')
 
   
 
   completed_epoch = loaded_epoch
+  completed_batches = 25
+  save_every_batches = 800
 
   for epoch in range(loaded_epoch,num_epochs):
     print(f'start DT_Contrastive_CLIP_train epoch#: {epoch+1}')
@@ -1374,10 +1382,10 @@ def DT_Contrastive_CLIP_train(DT_CLIP_model, num_epochs, data_loader, tree_crite
     batch_total_examples = 0
     
     #for batch_idx, (full_path, images, captions) in enumerate(tqdm(data_loader)):
-    for batch_idx, (images, captions, image_names) in enumerate(tqdm(data_loader)):
+    for batch_idx, (index, images, captions, image_names) in enumerate(tqdm(data_loader)):
       
-        if epoch == 0 and batch_idx < 800*11:
-          continue
+        if epoch == 2 and batch_idx < save_every_batches*completed_batches:
+         continue
 
       # with autograd.detect_anomaly():
       
@@ -1421,7 +1429,7 @@ def DT_Contrastive_CLIP_train(DT_CLIP_model, num_epochs, data_loader, tree_crite
               num_tries += 1
               idx_list = [*range(len(images))]
               rand_sample_index = random.choice([idx for idx in idx_list if idx not in used_indexes])
-              root, true_label_path, all_tree_nodes, edges ,node_texts = shuffle_func(captions[rand_sample_index])
+              root, true_label_path, all_tree_nodes, edges ,node_texts = tree_func(captions[rand_sample_index])
 
             else:
               break
@@ -1566,7 +1574,7 @@ def DT_Contrastive_CLIP_train(DT_CLIP_model, num_epochs, data_loader, tree_crite
         #     optimizer.step()
         #     optimizer.zero_grad()
         
-        save_every_batches = 800
+        
 
         if ((batch_idx + 1) % save_every_batches == 0) or (batch_idx + 1 == len(data_loader)):
           checkpoint_index = int((batch_idx + 1) / save_every_batches)
@@ -2408,8 +2416,8 @@ def main():
     test_dataset = ConceptualDS(cc3m_root, preprocess_val, "val")
 
 
-    train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True, num_workers=8, drop_last=False)
-    test_loader = DataLoader(dataset=test_dataset, batch_size=1, shuffle=True, num_workers=8, drop_last=False)
+    train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True, num_workers=1, drop_last=False)
+    #test_loader = DataLoader(dataset=test_dataset, batch_size=1, shuffle=True, num_workers=1, drop_last=False)
 
     
     save_frequency = 1

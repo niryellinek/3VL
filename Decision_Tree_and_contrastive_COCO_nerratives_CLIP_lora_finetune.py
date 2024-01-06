@@ -46,7 +46,7 @@ import plotly.graph_objects as go
 #from create_coarse_sentences import get_caption_tree, get_caption_tree2, get_caption_tree3, get_caption_tree4, get_caption_tree6, Node, expand_caption, plotly_plot_tree
 #from create_coarse_sentences import *
 from create_coarse_sentences import Node, get_t5_opposite, find_word_difference, expand_caption, get_box_text, plotly_plot_tree
-from create_coarse_sentences import get_caption_tree6, get_caption_tree6_lemmas, get_caption_tree6_shuffled_nouns_adjectives, get_caption_tree6_shuffle_all, get_caption_tree6_shuffle_random_all_branches, get_caption_tree6_with_noun_adj_shuffle, get_caption_tree6_narratives
+from create_coarse_sentences import get_caption_tree6, get_caption_tree6_lemmas, get_caption_tree6_shuffled_nouns_adjectives, get_caption_tree6_shuffle_all, get_caption_tree6_shuffle_random_all_branches, get_caption_tree6_with_noun_adj_shuffle, get_caption_tree6_narratives, get_caption_tree6_narratives_shuffle_all_branches
 from create_coarse_sentences import get_caption_tree4, get_caption_tree6_1, get_caption_tree6_2, get_caption_tree8, get_caption_tree6_shuffle_all_branches, get_caption_tree6_shuffle_nouns_all_branches, get_caption_tree6_with_random_shuffle, get_caption_tree6_with_all_shuffles
 
 #train CLIP with LoRA
@@ -1204,11 +1204,13 @@ def get_concat_v_blank(im1, im2, color=(0, 0, 0)):
     return dst
 
 
-def get_tree_loss(model, tree_criterion, image, caption, tree_func):
+def get_tree_loss(model, tree_criterion, images, captions, rand_sample_index, tree_func):
   
+  rand_image = images[rand_sample_index].unsqueeze(0)
+
   with torch.no_grad(): 
         
-        root, true_label_path, all_tree_nodes, edges ,node_texts = tree_func(caption)
+        root, true_label_path, all_tree_nodes, edges ,node_texts = tree_func(captions[rand_sample_index])
 
         #rare, but can happen that node_texts are empty ( node_texts = [''] ) (no noun chunks)
         max_tries = 3
@@ -1222,12 +1224,12 @@ def get_tree_loss(model, tree_criterion, image, caption, tree_func):
             num_tries += 1
             idx_list = [*range(len(images))]
             rand_sample_index = random.choice([idx for idx in idx_list if idx not in used_indexes])
-            root, true_label_path, all_tree_nodes, edges ,node_texts = shuffle_func(captions[rand_sample_index])
+            root, true_label_path, all_tree_nodes, edges ,node_texts = tree_func(captions[rand_sample_index])
 
           else:
             return None
 
-  log_probabilities = model(image,true_label_path, all_tree_nodes)
+  log_probabilities = model(rand_image,true_label_path, all_tree_nodes)
      
   #nn.NLLLoss and thus also nn.CrossEntropyLoss don’t support float16 tensors on the CPU
   log_probabilities = log_probabilities.to(device)
@@ -1237,7 +1239,7 @@ def get_tree_loss(model, tree_criterion, image, caption, tree_func):
   #node_num_labels = torch.tensor(true_label_path, dtype=torch.long, device=device)
 
   tree_loss = tree_criterion(log_probabilities, node_num_labels)
-  return tree_loss
+  return tree_loss, rand_sample_index
 
 def DT_Contrastive_CLIP_train(DT_CLIP_model, num_epochs, data_loader, tree_criterion, img_criterion, txt_criterion, optimizer, save_freq=5, update_weights_freq=1, checkpoint_name='checkpoint_DT_CLIP_epoch#'):
   DT_CLIP_model.train()
@@ -1246,14 +1248,15 @@ def DT_Contrastive_CLIP_train(DT_CLIP_model, num_epochs, data_loader, tree_crite
   
 
   # PATH = '/mnt5/nir/CLIP/interpret/COCO_DT_0.5_caption6_RB_size_LoRA_1_contrast_LR_3e6_checkpoint_epoch_0016.pt.tar'
+  # PATH = '/mnt5/nir/CLIP/interpret/COCO_DT_0.5_caption6_nerratives_plus_coco_LoRA_1_contrast_LR_3e6_checkpoint_epoch_0013.pt.tar'
+  PATH = '/mnt5/nir/CLIP/interpret/DT_0.5_flan_t5_LoRA_CLIP_contrast_0.5_checkpoint_epoch_0012.pt.tar'
 
-  
-  # checkpoint = torch.load(PATH)
-  # DT_CLIP_model.clip_model.load_state_dict(checkpoint['state_dict'])
+  checkpoint = torch.load(PATH)
+  DT_CLIP_model.clip_model.load_state_dict(checkpoint['state_dict'])
   # optimizer.load_state_dict(checkpoint['optimizer'])
   # loaded_epoch = checkpoint['completed_epoch']
-  # #loss = checkpoint['loss']
-  # print(f'DT_Contrastive_CLIP_train: loaded checkpoint from path: {PATH}')
+  #loss = checkpoint['loss']
+  print(f'DT_Contrastive_CLIP_train: loaded checkpoint from path: {PATH}')
   # print(f'DT_Contrastive_CLIP_train: loaded epoch: {loaded_epoch}')
 
   # print(f'DT_Contrastive_CLIP_train: start from scratch (epoch: {loaded_epoch})')
@@ -1261,6 +1264,7 @@ def DT_Contrastive_CLIP_train(DT_CLIP_model, num_epochs, data_loader, tree_crite
   tree_loss_weight = 0.5
   coco_caption_tree_func = get_caption_tree6
   narratives_caption_tree_func = get_caption_tree6_narratives
+  # narratives_caption_tree_func = get_caption_tree6_narratives_shuffle_all_branches
 
   print(f'train with lora_rank: {DT_CLIP_model.lora}, tree_loss_weight: {tree_loss_weight}, coco_caption_tree_func: {coco_caption_tree_func}, narratives_caption_tree_func: {narratives_caption_tree_func}')
   # print(f'train with lora_rank: {DT_CLIP_model.lora}, tree_loss_weight: {tree_loss_weight}, get_caption_tree6: RB color -> flan t5 opposites if exist otherwise co-hyponym.')
@@ -1283,18 +1287,19 @@ def DT_Contrastive_CLIP_train(DT_CLIP_model, num_epochs, data_loader, tree_crite
       rand_sample_index = random.randint(0, len(images)-1)
 
       images = images.to(device=device)
-      rand_image = images[rand_sample_index].unsqueeze(0)
+      # rand_image = images[rand_sample_index].unsqueeze(0)
       
-      coco_tree_loss = get_tree_loss(DT_CLIP_model, tree_criterion, rand_image, coco_captions[rand_sample_index], coco_caption_tree_func)
-      nerratives_tree_loss = get_tree_loss(DT_CLIP_model, tree_criterion, rand_image, nerratives[rand_sample_index], narratives_caption_tree_func)
+      # coco_tree_loss, rand_sample_index = get_tree_loss(DT_CLIP_model, tree_criterion, images, coco_captions, rand_sample_index, coco_caption_tree_func)
+      nerratives_tree_loss, rand_sample_index = get_tree_loss(DT_CLIP_model, tree_criterion, images, nerratives, rand_sample_index, narratives_caption_tree_func)
 
         
-      if not coco_tree_loss or not nerratives_tree_loss:
-        print(f'node_texts is not valid after num_tries: {num_tries}. continue to next batch')
+      # if not coco_tree_loss or not nerratives_tree_loss:
+      if not nerratives_tree_loss:
+        print(f'node_texts is not valid. continue to next batch')
         continue
 
-      
-      tree_loss = (coco_tree_loss + nerratives_tree_loss)/2
+      tree_loss = nerratives_tree_loss
+      # tree_loss = (coco_tree_loss + nerratives_tree_loss)/2
       #print(f'tree_loss: {tree_loss.item()}')
    
 

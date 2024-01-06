@@ -26,6 +26,8 @@ import igraph
 from igraph import Graph, EdgeSeq, plot
 import plotly.graph_objects as go
 from spellchecker import SpellChecker
+from VLI_SDRO.SISP_Transformations.gen_si import get_cfs_for_pos_statement
+
 
 os.environ['TRANSFORMERS_CACHE'] = '/mnt5/nir/transformers/cache/'
 #Disabling transformers parallelism to avoid deadlock with Dataloader parallelism
@@ -44,6 +46,80 @@ t5_word_dict = dict()
 #model = None
 #tokenizer = None
 
+spatial_negate = {
+    # Adjacency
+    "adjacent to": "nonadjacent to", 
+    "alongside": "away from", 
+    "at the side of": "away from", 
+    "at the right side of": "at the left side of", 
+    "at the left side of": "at the right side of",
+    "attached to": "disconnect from", 
+    "at the back of": "at the front of", 
+    "ahead of": "behind", 
+    "against": "away from", 
+    "at the edge of": "far from the edge of", 
+    # Directional
+    "off": "on", 
+    "past": "before", 
+    "toward": "away from", 
+    "down": "up", 
+    "away from": "not away from", 
+    "along": "not along", 
+    "around": "not around", 
+    "into": "not into", 
+    "across": "not accross",
+    "across from": "not across from", 
+    "down from": "up from", 
+    # Orientation
+    "facing": "facing away from", 
+    "facing away from": "facing", 
+    "parallel to": "perpendicular to", 
+    "perpendicular to": "parallel to", 
+    # Proximity
+    "by": "far away from", 
+    "close to": "far from", 
+    "near": "far from", 
+    "far from": "close to", 
+    "far away from": "by", 
+    # Topological
+    "connected to": "detached from", 
+    "detached from": "connected to", 
+    "has as a part": "does not have a part", 
+    "part of": "not part of", 
+    "contains": "does not contain", 
+    "within": "outside", 
+    "at": "not at", 
+    "on": "not on", 
+    "in": "not in",
+    "with": "not with", 
+    "surrounding": "not surrounding", 
+    "among": "not among", 
+    "consists of": "does not consists of", 
+    "out of": "not out of", 
+    "between": "not between", 
+    "inside": "outside", 
+    "outside": "inside", 
+    "touching": "not touching",
+    # Unallocated
+    "beyond": "inside",
+    "next to": "far from", 
+    "opposite to": "same as", 
+    "enclosed by": "not enclosed by", 
+    # missing
+    "above": "below",
+    "below": "above",
+    "behind": "infront",
+    "on top of": "not on top of",
+    "under": "over",
+    "over": "under",
+    "left of": "right of",
+    "right of": "left of",
+    "in front of": "behind",
+    "beneath": "not beneath",
+    "beside": "not beside",
+    "in the middle of": "not in the middle of",
+    "congruent": "incongruent",
+}
 
 color_list=['teal','brown','green','black','silver','white','yellow','purple','gray','blue','orange','red','blond','concrete','cream','beige','tan','pink','maroon',
 'olive','violet','charcoal','bronze','gold','navy','coral','burgundy','mauve','peach','rust','cyan','clay','ruby','amber']
@@ -101,7 +177,9 @@ def get_flan_t5_model_and_tokenizer():
   #tokenizer = T5Tokenizer.from_pretrained("t5-3b", model_max_length=30)
   #model = T5ForConditionalGeneration.from_pretrained("t5-3b", device_map="auto")
   
-  model = AutoModelForSeq2SeqLM.from_pretrained("google/flan-t5-large", device_map="auto")
+  # model = AutoModelForSeq2SeqLM.from_pretrained("google/flan-t5-large", device_map="auto")
+  model = AutoModelForSeq2SeqLM.from_pretrained("google/flan-t5-large").to(device)
+  # model = model.to(device)
   tokenizer = AutoTokenizer.from_pretrained("google/flan-t5-large")
 
   """
@@ -598,7 +676,8 @@ def shuffle_trigrams(caption):
 def get_all_shuffles_sentences(caption):
 
   res = []
-  shuffle_funcs = [shuffle_nouns_adjectives, shuffle_allbut_nouns_and_adj, shuffle_trigrams, shuffle_within_trigrams]
+  # shuffle_funcs = [shuffle_nouns_adjectives, shuffle_allbut_nouns_and_adj, shuffle_trigrams, shuffle_within_trigrams]
+  shuffle_funcs = [shuffle_nouns, shuffle_adjectives, shuffle_allbut_nouns_and_adj, shuffle_trigrams, shuffle_within_trigrams]
 
   for func in shuffle_funcs:
     shuffled = func(caption)
@@ -1154,6 +1233,7 @@ def get_t5_new_sentences(orig_doc, pos_to_replace=['NOUN', 'ADJ']):
   return new_sentences
 
 
+
 def get_t5_new_sentences2_lemmas(orig_text, pos_to_replace=['NOUN', 'ADJ']):
   #print(f'orig_text: {orig_text}','\n')
   #doc = nlp(orig_text)
@@ -1189,16 +1269,27 @@ def get_t5_new_sentences2_lemmas(orig_text, pos_to_replace=['NOUN', 'ADJ']):
   #print(f'get_t5_new_sentences2 new_sentences: {new_sentences}\n')
   return new_sentences
 
-def get_t5_new_sentences2(orig_text, pos_to_replace=['NOUN', 'ADJ']):
+
+def get_t5_new_sentences2_spatial_negate(orig_doc, pos_to_replace=['NOUN', 'ADJ']):
   #print(f'orig_text: {orig_text}','\n')
   #doc = nlp(orig_text)
   #orig_text_lst = orig_text.text.split()
-  orig_text_tokens_lst = [token.text for token in orig_text]
+  orig_text_tokens_lst = [token.text for token in orig_doc]
   #print(f'get_t5_new_sentences2 orig_text.text: {orig_text.text}')
   new_sentences = []
+
+  orig_text = orig_doc.text
+  shuffled_keys = list(spatial_negate.keys())
+  random.shuffle(shuffled_keys)
+  for k in shuffled_keys:
+    if k in orig_text:
+      new_text = orig_text.replace(k, spatial_negate[k])
+      new_sentences.append(new_text)
+      break
+
   token_index = 0
   #new_text_lst = []
-  for token in orig_text:
+  for token in orig_doc:
     #print(f'token.text: {token.text}, index: {token_index}, dep_: {token.dep_}, pos_: {token.pos_}, head: {token.head.text}\n')
     #print(f'token.text: {token.text}, token_index: {token_index}, token.i: {token.i}, pos_: {token.pos_}\n')
     #new_text_lst.append(token.text)
@@ -1224,6 +1315,55 @@ def get_t5_new_sentences2(orig_text, pos_to_replace=['NOUN', 'ADJ']):
         new_sentences.append(new_text)
     
     token_index += 1
+
+  #print(f'get_t5_new_sentences2 new_sentences: {new_sentences}\n')
+  return new_sentences
+
+
+# get_t5_new_sentences2_max_neg(orig_text, pos_to_replace=['NOUN', 'ADJ'], curr_neg=0, max_neg=math.inf):
+#def get_t5_new_sentences2(orig_text, pos_to_replace=['NOUN', 'ADJ'], num_neg=0, max_neg=math.inf):
+def get_t5_new_sentences2(orig_text, pos_to_replace=['NOUN', 'ADJ']):
+  #print(f'orig_text: {orig_text}','\n')
+  #doc = nlp(orig_text)
+  #orig_text_lst = orig_text.text.split()
+  orig_text_tokens_lst = [token.text for token in orig_text]
+  #print(f'get_t5_new_sentences2 orig_text.text: {orig_text.text}')
+  new_sentences = []
+  # token_index = 0
+  #new_text_lst = []
+  token_list = [(i, t) for i, t in enumerate(orig_text)]
+  random.shuffle(token_list)
+  # for token in orig_text:
+  for token_pair in token_list:
+    #print(f'token.text: {token.text}, index: {token_index}, dep_: {token.dep_}, pos_: {token.pos_}, head: {token.head.text}\n')
+    #print(f'token.text: {token.text}, token_index: {token_index}, token.i: {token.i}, pos_: {token.pos_}\n')
+    #new_text_lst.append(token.text)
+    #if num_neg >= max_neg:
+     # return new_sentences
+
+    if token_pair[1].pos_ in pos_to_replace:
+      
+      #print(f'token {token.text} index: {token_index} is {token.pos_}\n')
+      #print(f'orig_text_lst: {orig_text_lst}\n')
+      
+      # rand_word = get_rb_rand_word(token.text, token.pos_)
+      rand_word = None
+
+      if not rand_word:
+        rand_word = get_t5_rand_word2(token_pair[1].text, token_pair[1].pos_)
+      #print(f'rand_word: {rand_word}')
+      if rand_word != '':
+        #new_text_lst = orig_text_lst.copy()
+        new_text_lst = orig_text_tokens_lst.copy()
+        new_text_lst[token_pair[0]] = rand_word
+        #new_text_lst[-1] = rand_word
+        #print(f'new_text_lst: {new_text_lst}')
+        new_text = ' '.join(new_text_lst)
+        #print(f'new_text: {new_text}')
+        new_sentences.append(new_text)
+        #num_neg += 1
+    
+    # token_index += 1
 
   #print(f'get_t5_new_sentences2 new_sentences: {new_sentences}\n')
   return new_sentences
@@ -2953,6 +3093,116 @@ def get_caption_tree6_shuffle_all_branches(original_caption):
   return root, true_label_path, all_tree_nodes, edges ,node_texts
 
 
+def get_caption_tree6_narratives_shuffle_all_branches(original_caption):
+  #print(f'\noriginal_sentence: {original_caption}\n')
+  original_caption = original_caption.translate(str.maketrans('', '', string.punctuation))
+  original_caption = original_caption.lower()
+  doc = nlp(original_caption)
+ 
+  node_index = 0
+  root = Node(node_num=node_index, prompt='entity')
+ 
+  node_index += 1
+  true_label_path = []
+  all_tree_nodes = []
+  node_texts = []
+  edges = []
+  all_tree_nodes.append(root)
+  
+  prev_text = ""
+  add_prev_text = False
+  node_texts.append("")
+  next_path_node = root
+  prev_path_node = root
+  #curr_path_node = None
+  curr_doc = None
+  prev_chunk_end_index = -1
+  prev_noun_chunk = None
+  #print(f'get_caption_tree6: original_caption: {original_caption}')
+  last_chunk_end_index = 0
+  #print(f'original_caption : {original_caption}')
+  for chunk in doc.noun_chunks:
+    #print(f'get_caption_tree6: chunk.text: {chunk.text}')
+    text_to_modify_lst = get_narratives_text_to_modify(prev_noun_chunk, chunk, doc)
+    prev_noun_chunk = chunk
+    for (doc_mod, prefix, suffix) in text_to_modify_lst:
+      #print(f'get_caption_tree6: doc_mod.text: {doc_mod.text}')
+      prev_path_node = next_path_node
+      
+      text = prefix + doc_mod.text + suffix
+      #print(text)
+      next_path_node = create_path_node(node_index, prev_path_node, text, true_label_path, edges, node_texts, all_tree_nodes)
+      node_index += 1
+   
+      #new_noun_phrases = get_new_noun_phrases(doc_mod)
+      new_noun_phrases = get_t5_new_sentences2(doc_mod, pos_to_replace=['NOUN', 'ADJ', 'VERB', 'ADP'])
+      #print(f'new_noun_phrases: {new_noun_phrases}')
+      #get_t5_new_sentences(orig_doc, pos_to_replace=['NOUN', 'ADJ', 'VERB', 'ADP'])
+      for mod_text in new_noun_phrases:
+        new_text = prefix + mod_text + suffix
+      
+        tmp_node = create_node(node_index, prev_path_node, new_text, edges, node_texts, all_tree_nodes)
+        node_index += 1
+      
+      ###########################
+      #add reordering after each branch
+      ############################
+      
+      new_sentences =  get_all_shuffles_sentences(text)
+      if new_sentences:
+
+        prev_path_node = next_path_node
+        next_path_node = create_path_node(node_index, prev_path_node, text, true_label_path, edges, node_texts, all_tree_nodes)
+        node_index += 1
+
+
+        for new_text in new_sentences:
+        
+          tmp_node = create_node(node_index, prev_path_node, new_text, edges, node_texts, all_tree_nodes)
+          node_index += 1
+
+      ###########################
+      #add reordering after each branch
+      ############################
+       
+  #add original sentence only if not added before with last noun_chunk
+  if prev_noun_chunk and prev_noun_chunk.end != len(doc):
+    
+    prev_path_node = next_path_node
+    
+    next_path_node = create_path_node(node_index, prev_path_node, original_caption, true_label_path, edges, node_texts, all_tree_nodes)
+    node_index += 1
+  
+    #new_sentences = get_new_verb_phrases(doc)
+    #new_sentences = get_new_noun_phrases(doc[prev_noun_chunk.end:])
+    new_sentences = get_t5_new_sentences2(doc[prev_noun_chunk.end:], pos_to_replace=['NOUN', 'ADJ', 'VERB', 'ADP'])
+    #shuffled_sentence = shuffle(original_caption)
+    #new_sentences.aapend(shuffled_sentence)
+    #print(f'new_sentences: {new_sentences}')
+    for new_sentence in new_sentences:
+      text = doc[0:prev_noun_chunk.end].text + " " + new_sentence
+      #print(f'text: {text}')
+      tmp_node = create_node(node_index, prev_path_node, text, edges, node_texts, all_tree_nodes)
+      node_index += 1
+  
+
+  new_sentences =  get_all_shuffles_sentences(original_caption)
+  if new_sentences:
+
+    prev_path_node = next_path_node
+    next_path_node = create_path_node(node_index, prev_path_node, original_caption, true_label_path, edges, node_texts, all_tree_nodes)
+    node_index += 1
+
+
+    for text in new_sentences:
+        #text = doc[0:prev_noun_chunk.end].text + " " + new_sentence
+        #print(f'text: {text}')
+        tmp_node = create_node(node_index, prev_path_node, text, edges, node_texts, all_tree_nodes)
+        node_index += 1
+  
+  return root, true_label_path, all_tree_nodes, edges ,node_texts
+
+
 def get_caption_tree6_shuffle_all(original_caption):
   #print(f'\noriginal_sentence: {original_caption}\n')
   original_caption = original_caption.translate(str.maketrans('', '', string.punctuation))
@@ -3284,6 +3534,386 @@ def get_caption_tree6(original_caption):
  
   return root, true_label_path, all_tree_nodes, edges ,node_texts
 
+
+def get_caption_tree6_max_neg(original_caption, max_neg=math.inf):
+  #print(f'\noriginal_sentence: {original_caption}\n')
+  original_caption = original_caption.translate(str.maketrans('', '', string.punctuation))
+  original_caption = original_caption.lower()
+  doc = nlp(original_caption)
+ 
+  node_index = 0
+  num_neg = 0
+  root = Node(node_num=node_index, prompt='entity')
+ 
+  node_index += 1
+  true_label_path = []
+  all_tree_nodes = []
+  node_texts = []
+  edges = []
+  all_tree_nodes.append(root)
+  
+  prev_text = ""
+  add_prev_text = False
+  node_texts.append("")
+  next_path_node = root
+  prev_path_node = root
+  #curr_path_node = None
+  curr_doc = None
+  prev_chunk_end_index = -1
+  prev_noun_chunk = None
+  #print(f'get_caption_tree6: original_caption: {original_caption}')
+  last_chunk_end_index = 0
+
+  pos_to_replace=['NOUN', 'ADJ', 'VERB', 'ADP']
+
+  #print(f'original_caption : {original_caption}')
+  for chunk in doc.noun_chunks:
+    #print(f'get_caption_tree6: chunk.text: {chunk.text}')
+    text_to_modify_lst = get_text_to_modify(prev_noun_chunk, chunk, doc)
+    prev_noun_chunk = chunk
+    for (doc_mod, prefix, suffix) in text_to_modify_lst:
+      
+      if num_neg >= max_neg:
+        return root, true_label_path, all_tree_nodes, edges ,node_texts
+
+      #print(f'get_caption_tree6: doc_mod.text: {doc_mod.text}')
+      prev_path_node = next_path_node
+      
+      text = prefix + doc_mod.text + suffix
+      #print(text)
+      next_path_node = create_path_node(node_index, prev_path_node, text, true_label_path, edges, node_texts, all_tree_nodes)
+      node_index += 1
+   
+      #new_noun_phrases = get_new_noun_phrases(doc_mod)
+      
+      new_noun_phrases = get_t5_new_sentences2(doc_mod, pos_to_replace, num_neg, max_neg)
+      num_neg += len(new_noun_phrases)
+      #print(f'new_noun_phrases: {new_noun_phrases}')
+      #get_t5_new_sentences(orig_doc, pos_to_replace=['NOUN', 'ADJ', 'VERB', 'ADP'])
+      for mod_text in new_noun_phrases:
+        new_text = prefix + mod_text + suffix
+      
+        tmp_node = create_node(node_index, prev_path_node, new_text, edges, node_texts, all_tree_nodes)
+        node_index += 1
+       
+  #add original sentence only if not added before with last noun_chunk
+  if prev_noun_chunk and num_neg < max_neg and prev_noun_chunk.end != len(doc):
+    
+    prev_path_node = next_path_node
+    
+    next_path_node = create_path_node(node_index, prev_path_node, original_caption, true_label_path, edges, node_texts, all_tree_nodes)
+    node_index += 1
+  
+    #new_sentences = get_new_verb_phrases(doc)
+    #new_sentences = get_new_noun_phrases(doc[prev_noun_chunk.end:])
+    new_sentences = get_t5_new_sentences2(doc[prev_noun_chunk.end:], pos_to_replace, num_neg, max_neg)
+    #shuffled_sentence = shuffle(original_caption)
+    #new_sentences.aapend(shuffled_sentence)
+    #print(f'new_sentences: {new_sentences}')
+    for new_sentence in new_sentences:
+      text = doc[0:prev_noun_chunk.end].text + " " + new_sentence
+      #print(f'text: {text}')
+      tmp_node = create_node(node_index, prev_path_node, text, edges, node_texts, all_tree_nodes)
+      node_index += 1
+  
+ 
+  return root, true_label_path, all_tree_nodes, edges ,node_texts
+
+
+def get_caption_tree6_spatial_negate(original_caption):
+  #print(f'\noriginal_sentence: {original_caption}\n')
+  original_caption = original_caption.translate(str.maketrans('', '', string.punctuation))
+  original_caption = original_caption.lower()
+  doc = nlp(original_caption)
+ 
+  node_index = 0
+  root = Node(node_num=node_index, prompt='entity')
+ 
+  node_index += 1
+  true_label_path = []
+  all_tree_nodes = []
+  node_texts = []
+  edges = []
+  all_tree_nodes.append(root)
+  
+  prev_text = ""
+  add_prev_text = False
+  node_texts.append("")
+  next_path_node = root
+  prev_path_node = root
+  #curr_path_node = None
+  curr_doc = None
+  prev_chunk_end_index = -1
+  prev_noun_chunk = None
+  #print(f'get_caption_tree6: original_caption: {original_caption}')
+  last_chunk_end_index = 0
+  #print(f'original_caption : {original_caption}')
+  for chunk in doc.noun_chunks:
+    #print(f'get_caption_tree6: chunk.text: {chunk.text}')
+    text_to_modify_lst = get_text_to_modify(prev_noun_chunk, chunk, doc)
+    prev_noun_chunk = chunk
+    for (doc_mod, prefix, suffix) in text_to_modify_lst:
+      #print(f'get_caption_tree6: doc_mod.text: {doc_mod.text}')
+      prev_path_node = next_path_node
+      
+      text = prefix + doc_mod.text + suffix
+      #print(text)
+      next_path_node = create_path_node(node_index, prev_path_node, text, true_label_path, edges, node_texts, all_tree_nodes)
+      node_index += 1
+   
+      #new_noun_phrases = get_new_noun_phrases(doc_mod)
+      new_noun_phrases = get_t5_new_sentences2_spatial_negate(doc_mod, pos_to_replace=['NOUN', 'ADJ', 'VERB'])
+      #print(f'new_noun_phrases: {new_noun_phrases}')
+      #get_t5_new_sentences(orig_doc, pos_to_replace=['NOUN', 'ADJ', 'VERB', 'ADP'])
+      for mod_text in new_noun_phrases:
+        new_text = prefix + mod_text + suffix
+      
+        tmp_node = create_node(node_index, prev_path_node, new_text, edges, node_texts, all_tree_nodes)
+        node_index += 1
+       
+  #add original sentence only if not added before with last noun_chunk
+  if prev_noun_chunk and prev_noun_chunk.end != len(doc):
+    
+    prev_path_node = next_path_node
+    
+    next_path_node = create_path_node(node_index, prev_path_node, original_caption, true_label_path, edges, node_texts, all_tree_nodes)
+    node_index += 1
+  
+    #new_sentences = get_new_verb_phrases(doc)
+    #new_sentences = get_new_noun_phrases(doc[prev_noun_chunk.end:])
+    new_sentences = get_t5_new_sentences2_spatial_negate(doc[prev_noun_chunk.end:], pos_to_replace=['NOUN', 'ADJ', 'VERB', 'ADP'])
+    #shuffled_sentence = shuffle(original_caption)
+    #new_sentences.aapend(shuffled_sentence)
+    #print(f'new_sentences: {new_sentences}')
+    for new_sentence in new_sentences:
+      text = doc[0:prev_noun_chunk.end].text + " " + new_sentence
+      #print(f'text: {text}')
+      tmp_node = create_node(node_index, prev_path_node, text, edges, node_texts, all_tree_nodes)
+      node_index += 1
+  
+ 
+  return root, true_label_path, all_tree_nodes, edges ,node_texts
+
+
+
+def get_caption_tree6_gen_si(original_caption):
+  #print(f'\noriginal_sentence: {original_caption}\n')
+  original_caption = original_caption.translate(str.maketrans('', '', string.punctuation))
+  original_caption = original_caption.lower()
+  doc = nlp(original_caption)
+ 
+  node_index = 0
+  root = Node(node_num=node_index, prompt='entity')
+ 
+  node_index += 1
+  true_label_path = []
+  all_tree_nodes = []
+  node_texts = []
+  edges = []
+  all_tree_nodes.append(root)
+  
+  prev_text = ""
+  add_prev_text = False
+  node_texts.append("")
+  next_path_node = root
+  prev_path_node = root
+  #curr_path_node = None
+  curr_doc = None
+  prev_chunk_end_index = -1
+  prev_noun_chunk = None
+  #print(f'get_caption_tree6: original_caption: {original_caption}')
+  last_chunk_end_index = 0
+  #print(f'original_caption : {original_caption}')
+  for chunk in doc.noun_chunks:
+    #print(f'get_caption_tree6: chunk.text: {chunk.text}')
+    text_to_modify_lst = get_text_to_modify(prev_noun_chunk, chunk, doc)
+    prev_noun_chunk = chunk
+    for (doc_mod, prefix, suffix) in text_to_modify_lst:
+      #print(f'get_caption_tree6: doc_mod.text: {doc_mod.text}')
+      prev_path_node = next_path_node
+      
+      text = prefix + doc_mod.text + suffix
+      #print(text)
+      next_path_node = create_path_node(node_index, prev_path_node, text, true_label_path, edges, node_texts, all_tree_nodes)
+      node_index += 1
+   
+      #new_noun_phrases = get_new_noun_phrases(doc_mod)
+      # new_noun_phrases = get_t5_new_sentences2(doc_mod, pos_to_replace=['NOUN', 'ADJ', 'VERB', 'ADP'])
+      new_noun_phrases, cf_tag = get_cfs_for_pos_statement(doc_mod.text)
+      #print(f'new_noun_phrases: {new_noun_phrases}')
+      #get_t5_new_sentences(orig_doc, pos_to_replace=['NOUN', 'ADJ', 'VERB', 'ADP'])
+      for mod_text in new_noun_phrases:
+        new_text = prefix + mod_text + suffix
+      
+        tmp_node = create_node(node_index, prev_path_node, new_text, edges, node_texts, all_tree_nodes)
+        node_index += 1
+       
+  #add original sentence only if not added before with last noun_chunk
+  if prev_noun_chunk and prev_noun_chunk.end != len(doc):
+    
+    prev_path_node = next_path_node
+    
+    next_path_node = create_path_node(node_index, prev_path_node, original_caption, true_label_path, edges, node_texts, all_tree_nodes)
+    node_index += 1
+  
+    #new_sentences = get_new_verb_phrases(doc)
+    #new_sentences = get_new_noun_phrases(doc[prev_noun_chunk.end:])
+    # new_sentences = get_t5_new_sentences2(doc[prev_noun_chunk.end:], pos_to_replace=['NOUN', 'ADJ', 'VERB', 'ADP'])
+    new_sentences, cf_tag = get_cfs_for_pos_statement(doc[prev_noun_chunk.end:].text)
+    #shuffled_sentence = shuffle(original_caption)
+    #new_sentences.aapend(shuffled_sentence)
+    #print(f'new_sentences: {new_sentences}')
+    for new_sentence in new_sentences:
+      text = doc[0:prev_noun_chunk.end].text + " " + new_sentence
+      #print(f'text: {text}')
+      tmp_node = create_node(node_index, prev_path_node, text, edges, node_texts, all_tree_nodes)
+      node_index += 1
+  
+ 
+  return root, true_label_path, all_tree_nodes, edges ,node_texts
+
+
+def get_caption_tree6_depth1(original_caption):
+  #print(f'\noriginal_sentence: {original_caption}\n')
+  original_caption = original_caption.translate(str.maketrans('', '', string.punctuation))
+  original_caption = original_caption.lower()
+  doc = nlp(original_caption)
+ 
+  node_index = 0
+  root = Node(node_num=node_index, prompt='entity')
+ 
+  node_index += 1
+  true_label_path = []
+  all_tree_nodes = []
+  node_texts = []
+  edges = []
+  all_tree_nodes.append(root)
+  
+  prev_text = ""
+  add_prev_text = False
+  node_texts.append("")
+  next_path_node = root
+  prev_path_node = root
+  #curr_path_node = None
+  curr_doc = None
+  prev_chunk_end_index = -1
+  prev_noun_chunk = None
+  #print(f'get_caption_tree6: original_caption: {original_caption}')
+  last_chunk_end_index = 0
+  #print(f'original_caption : {original_caption}')
+    
+  prev_path_node = next_path_node
+  
+  next_path_node = create_path_node(node_index, prev_path_node, original_caption, true_label_path, edges, node_texts, all_tree_nodes)
+  node_index += 1
+
+  #new_sentences = get_new_verb_phrases(doc)
+  #new_sentences = get_new_noun_phrases(doc[prev_noun_chunk.end:])
+  new_sentences = get_t5_new_sentences2(doc, pos_to_replace=['NOUN', 'ADJ', 'VERB', 'ADP'])
+  #shuffled_sentence = shuffle(original_caption)
+  #new_sentences.aapend(shuffled_sentence)
+  #print(f'new_sentences: {new_sentences}')
+  for new_sentence in new_sentences:
+    text = new_sentence
+    #print(f'text: {text}')
+    tmp_node = create_node(node_index, prev_path_node, text, edges, node_texts, all_tree_nodes)
+    node_index += 1
+  
+ 
+  return root, true_label_path, all_tree_nodes, edges ,node_texts
+
+
+def get_caption_tree6_max_depth(original_caption, max_depth=1):
+  #print(f'\noriginal_sentence: {original_caption}\n')
+  original_caption = original_caption.translate(str.maketrans('', '', string.punctuation))
+  original_caption = original_caption.lower()
+  doc = nlp(original_caption)
+
+  node_index = 0
+  root = Node(node_num=node_index, prompt='entity')
+
+  node_index += 1
+  true_label_path = []
+  all_tree_nodes = []
+  node_texts = []
+  edges = []
+  all_tree_nodes.append(root)
+  
+  prev_text = ""
+  add_prev_text = False
+  node_texts.append("")
+  next_path_node = root
+  prev_path_node = root
+  #curr_path_node = None
+  curr_doc = None
+  prev_chunk_end_index = -1
+  prev_noun_chunk = None
+  #print(f'get_caption_tree6: original_caption: {original_caption}')
+  last_chunk_end_index = 0
+  #print(f'original_caption : {original_caption}')
+  max_internal_nodes = max_depth - 1
+  num_internal_nodes = 0
+  for chunk in doc.noun_chunks:
+    if num_internal_nodes >= max_internal_nodes:
+      # print(f'new chunk num_internal_nodes: {num_internal_nodes} >= max_internal_nodes: {max_internal_nodes}')
+      break
+    #print(f'get_caption_tree6: chunk.text: {chunk.text}')
+    text_to_modify_lst = get_text_to_modify(prev_noun_chunk, chunk, doc)
+    prev_noun_chunk = chunk
+    for (doc_mod, prefix, suffix) in text_to_modify_lst:
+      if num_internal_nodes >= max_internal_nodes:
+        # print(f'new doc_mod num_internal_nodes: {num_internal_nodes} >= max_internal_nodes: {max_internal_nodes}')
+        break
+      #print(f'get_caption_tree6: doc_mod.text: {doc_mod.text}')
+      prev_path_node = next_path_node
+      
+      text = prefix + doc_mod.text + suffix
+      #print(text)
+      if num_internal_nodes < max_internal_nodes:
+        num_internal_nodes += 1
+        next_path_node = create_path_node(node_index, prev_path_node, text, true_label_path, edges, node_texts, all_tree_nodes)
+        node_index += 1
+    
+        #new_noun_phrases = get_new_noun_phrases(doc_mod)
+        new_noun_phrases = get_t5_new_sentences2(doc_mod, pos_to_replace=['NOUN', 'ADJ', 'VERB', 'ADP'])
+        #print(f'new_noun_phrases: {new_noun_phrases}')
+        #get_t5_new_sentences(orig_doc, pos_to_replace=['NOUN', 'ADJ', 'VERB', 'ADP'])
+        for mod_text in new_noun_phrases:
+          new_text = prefix + mod_text + suffix
+        
+          tmp_node = create_node(node_index, prev_path_node, new_text, edges, node_texts, all_tree_nodes)
+          node_index += 1
+      
+  #add original sentence only if not added before with last noun_chunk
+  if prev_noun_chunk and prev_noun_chunk.end != len(doc):
+    
+    prev_path_node = next_path_node
+    
+    next_path_node = create_path_node(node_index, prev_path_node, original_caption, true_label_path, edges, node_texts, all_tree_nodes)
+    node_index += 1
+  
+    #new_sentences = get_new_verb_phrases(doc)
+    #new_sentences = get_new_noun_phrases(doc[prev_noun_chunk.end:])
+    new_sentences = get_t5_new_sentences2(doc[prev_noun_chunk.end:], pos_to_replace=['NOUN', 'ADJ', 'VERB', 'ADP'])
+    #shuffled_sentence = shuffle(original_caption)
+    #new_sentences.aapend(shuffled_sentence)
+    #print(f'new_sentences: {new_sentences}')
+    for new_sentence in new_sentences:
+      text = doc[0:prev_noun_chunk.end].text + " " + new_sentence
+      #print(f'text: {text}')
+      tmp_node = create_node(node_index, prev_path_node, text, edges, node_texts, all_tree_nodes)
+      node_index += 1
+  
+
+  return root, true_label_path, all_tree_nodes, edges ,node_texts
+
+
+def get_caption_tree6_depth2(original_caption):
+  return get_caption_tree6_max_depth(original_caption, max_depth=2)
+
+
+def get_caption_tree6_depth3(original_caption):
+    return get_caption_tree6_max_depth(original_caption, max_depth=3)
 
 
 def get_caption_tree6_lemmas(original_caption):
@@ -4016,6 +4646,22 @@ def get_t5_rand_mask_fill_list(masked_text, num_words=3):
   return word_fills
 
 
+def get_t5_opposite_sentence(sentence):
+  
+  #if not model:
+  #  model, tokenizer = get_t5_model_and_tokenizer()
+  model, tokenizer = get_flan_t5_model_and_tokenizer()
+  prompt = f"find an opposite for the below sentence: \n{sentence}"
+  #print(f'get_t5_opposite. prompt: {prompt}')
+  inputs = tokenizer(prompt, return_tensors="pt").to(device)
+
+  
+  outputs = model.generate(**inputs, max_new_tokens=3, num_beams = 5, num_return_sequences=3)
+  decoded_outputs = tokenizer.batch_decode(outputs, skip_special_tokens=True)
+  #print(f'get_t5_opposite. decoded_outputs: {decoded_outputs}')
+  return decoded_outputs
+
+
 def get_t5_opposite(word):
   
   #if not model:
@@ -4303,16 +4949,29 @@ if __name__ == "__main__":
     # orig_text = "why play is so vital for learning !"
     # orig_text = "why play is so vital for learning"
 
-    orig_text = "This image is taken outdoors. In the bottom of the image there is a ground with grass on it. In the middle of the image a kid is playing baseball with a baseball bat. In the background there is a mesh and a board"
+    # orig_text = "This image is taken outdoors. In the bottom of the image there is a ground with grass on it. In the middle of the image a kid is playing baseball with a baseball bat. In the background there is a mesh and a board"
 
+    #orig_text = "A group of friends playing a motion controlled video game"
+
+    # orig_text = "a green field"
+    # orig_text = "The two women are driving on the street with the convertible top down."
+    orig_text = "The cow is ahead of the person"
     
     # root, true_label_path, all_tree_nodes, edges ,node_texts = get_caption_tree6_with_all_shuffles(orig_text)
     # root, true_label_path, all_tree_nodes, edges ,node_texts = get_caption_tree6(orig_text)
-    root, true_label_path, all_tree_nodes, edges ,node_texts = get_caption_tree6_narratives(orig_text)
+    # root, true_label_path, all_tree_nodes, edges ,node_texts = get_caption_tree6_narratives(orig_text)
+    # root, true_label_path, all_tree_nodes, edges ,node_texts = get_caption_tree6_depth1(orig_text)
+
+    # cf_stmt, cf_tag = get_cfs_for_pos_statement(orig_text)
+    # print(f'\n\ncf_stmt: \n{cf_stmt}')
+
+    opposite = get_t5_opposite_sentence(orig_text)
+    print(f'orig_text: {orig_text} \nopposite: {opposite}')
 
 
     # root, true_label_path, all_tree_nodes, edges ,node_texts = get_caption_tree7(orig_text)
-    print(node_texts)
+    # print(f'node_texts: {node_texts}')
+    # print(f'true_label_path: {true_label_path}')
 
     #word = 'uten' #False
     #word = 'plateless' #False

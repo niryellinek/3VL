@@ -28,15 +28,19 @@ except ImportError:
 
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
 
-def perturbation_image(clip_model, img, text_inputs, cam_image, pert_steps, pert_acc, is_positive_pert=False):
+# def perturbation_image(clip_model, img, text_inputs, cam_image, pert_steps, pert_acc, is_positive_pert=False):
+def perturbation_image(clip_model, img, text_inputs, positive_diff_cam_image, negative_diff_cam_image, pert_steps, pert_acc, is_positive_pert=False):
+
     with torch.no_grad():
         if is_positive_pert:
-            cam_image = cam_image * (-1)
+            positive_diff_cam_image = positive_diff_cam_image * (-1)
+            negative_diff_cam_image = negative_diff_cam_image * (-1)
+
         
         text_features = clip_model.encode_text(text_inputs)
         text_features /= text_features.norm(dim=-1, keepdim=True)
 
-        total_num_patches = cam_image.shape[0]
+        total_num_patches = positive_diff_cam_image.shape[0]
         #print(f'total_num_patches: {total_num_patches}')
 
 
@@ -46,30 +50,45 @@ def perturbation_image(clip_model, img, text_inputs, cam_image, pert_steps, pert
             # find top step boxes
             num_top_patches = int((1 - step) * total_num_patches)
             #print(f'step_idx: {step_idx}, step: {step}, num_top_patches: {num_top_patches}')
-            _, top_patches_indices = cam_image.topk(k=num_top_patches, dim=-1)
+            _, positive_top_patches_indices = positive_diff_cam_image.topk(k=num_top_patches, dim=-1)
             #print(f'top_patches_indices: {top_patches_indices}')
-            top_patches_indices = top_patches_indices.cpu().data.numpy()
-            top_patches_indices.sort()
+            positive_top_patches_indices = positive_top_patches_indices.cpu().data.numpy()
+            positive_top_patches_indices.sort()
 
-            #clip_model.visual.forward_patches - for classification
-                #later for classification with fewer image tokens
-            image_features = clip_model.visual.forward_patches(img,top_patches_indices)
+            _, negative_top_patches_indices = negative_diff_cam_image.topk(k=num_top_patches, dim=-1)
+            #print(f'top_patches_indices: {top_patches_indices}')
+            negative_top_patches_indices = negative_top_patches_indices.cpu().data.numpy()
+            negative_top_patches_indices.sort()
+
+            
+            positive_image_features = clip_model.visual.forward_patches(img,positive_top_patches_indices)
             
             #normalize image_features and text_features
-            image_features /= image_features.norm(dim=-1, keepdim=True)
-            
-            similarity = (100.0 * image_features @ text_features.T).softmax(dim=-1)
-            
-            #print(f'similarity.shape: {similarity.shape}, similarity: {similarity}')
+            positive_image_features /= positive_image_features.norm(dim=-1, keepdim=True)
 
-            pos_score = similarity[0][0]
-            neg_score = similarity[0][1]
+            negative_image_features = clip_model.visual.forward_patches(img,negative_top_patches_indices)
+            
+            #normalize image_features and text_features
+            negative_image_features /= negative_image_features.norm(dim=-1, keepdim=True)
+
+            
+            positive_similarity = 100.0 * positive_image_features @ text_features.T
+            negative_similarity = 100.0 * negative_image_features @ text_features.T
+
+
+            #similarity = (100.0 * image_features @ text_features.T).softmax(dim=-1)
+            
+            #print(f'positive_similarity.shape: {positive_similarity.shape}, negaitive_similarity: {negaitive_similarity}')
+
+            pos_score = positive_similarity[0][0] + negative_similarity[0][0]
+            neg_score = negative_similarity[0][1] + positive_similarity[0][1]
             #print(f'pos_score: {pos_score}, neg_score: {neg_score}')
             if pos_score > neg_score:
                 pert_acc[step_idx] += 1
 
         #exit(0)
         return pert_acc
+
 
     
 
@@ -183,7 +202,7 @@ def main():
     # TYPES = ["Attribute/color", "Attribute/material", "Attribute/size", "Attribute/action", "Attribute/state"]
     # TYPES = ["Relation/action", "Relation/spatial", "Attribute/color", "Attribute/material", "Attribute/size", "Attribute/action", "Attribute/state"]
     # TYPES = ["Relation/action"]
-    # TYPES = ["Attribute/color"]
+    #TYPES = ["Attribute/color"]
     TYPES = ["Attribute/material", "Attribute/size", "Attribute/action", "Attribute/state"]
 
 
@@ -199,9 +218,9 @@ def main():
     
     # pert_steps = [0, 0.25, 0.5, 0.75, 0.8, 0.85, 0.9, 0.95, 1]
     # pert_steps = [0.4, 0.45, 0.55, 0.6, 0.65, 0.7 ]
-    # pert_steps = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95 ]
+    pert_steps = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95 ]
     # pert_steps = [0.7, 0.75, 0.8, 0.85, 0.9, 0.95 ]
-    pert_steps = [0.65]
+    # pert_steps = [0.65]
 
 
     print(f'use text diff relevancy map')
@@ -236,6 +255,10 @@ def main():
                     texts_anc = [z['texts_anc'][0] for z in batch]
                     texts_diff = [z['texts_diff'][0] for z in batch]
                     texts_or = [z['texts_or'][0] for z in batch]
+                    texts_pos_diff = [z['texts_pos_diff'][0] for z in batch]
+                    texts_neg_diff = [z['texts_neg_diff'][0] for z in batch]
+                    texts_anc_diff = [z['texts_anc_diff'][0] for z in batch]
+
 
                     # skip_equal_pos_neg = False
                     skip_equal_pos_neg = True
@@ -251,7 +274,9 @@ def main():
                     #print(f'images.shape: {images.shape}, texts_pos.shape: {texts_pos.shape}, texts_neg.shape: {texts_neg.shape}')
                     #print(f'\n\nimage_paths: {image_paths}, \ntexts_pos: {texts_pos}, \ntexts_neg: {texts_neg}')
 
-                    texts = [texts_pos[0], texts_neg[0], texts_anc[0], texts_diff[0], texts_or[0]]
+                    # texts = [texts_pos[0], texts_neg[0], texts_anc[0], texts_diff[0], texts_or[0], texts_pos_diff[0], texts_neg_diff[0], texts_anc_diff[0]]
+                    texts = [texts_pos_diff[0], texts_neg_diff[0], texts_anc_diff[0]]
+
 
                     img = preprocess(Image.open(image_paths[0])).unsqueeze(0).to(device)
                     #img = preprocess(Image.open(img_path)).unsqueeze(0).to(device)
@@ -260,24 +285,42 @@ def main():
 
                     R_text, R_image = interpret(model=clip_model, image=img, texts=tokenized_text, device=device)
                     #cam_image_idx = 0 if positive_cam else 1
-                    positive_cam_image = R_image[0]
-                    negative_cam_image = R_image[1]
-                    ancor_cam_image = R_image[2]
-                    diff_cam_image = R_image[3]
-                    or_text_cam_image = R_image[4]
+                    # positive_cam_image = R_image[0]
+                    # negative_cam_image = R_image[1]
+                    # ancor_cam_image = R_image[2]
+                    # diff_cam_image = R_image[3]
+                    # or_text_cam_image = R_image[4]
+                    # pos_diff_cam_image = R_image[5]
+                    # neg_diff_cam_image = R_image[6]
+                    # anc_diff_cam_image = R_image[7]
+                    pos_diff_cam_image = R_image[0]
+                    neg_diff_cam_image = R_image[1]
+                    anc_diff_cam_image = R_image[2]
+
+                    positive_cam_image = pos_diff_cam_image
+                    negative_cam_image = neg_diff_cam_image
+                    ancor_cam_image = anc_diff_cam_image
+
+                    positive_diff_cam = positive_cam_image - ancor_cam_image
+                    negative_diff_cam = negative_cam_image - ancor_cam_image
+                    
+                    positive_diff_cam = (positive_diff_cam - positive_diff_cam.min()) / (positive_diff_cam.max() - positive_diff_cam.min())
+                    negative_diff_cam = (negative_diff_cam - negative_diff_cam.min()) / (negative_diff_cam.max() - negative_diff_cam.min())
+                  
+
 
                     #try diff without normaliziing first
                     #positive_cam_image = (positive_cam_image - positive_cam_image.min()) / (positive_cam_image.max() - positive_cam_image.min())
                     #negative_cam_image = (negative_cam_image - negative_cam_image.min()) / (negative_cam_image.max() - negative_cam_image.min())
                   
-                    cam_image = or_text_cam_image
+                    # cam_image = or_text_cam_image
                     
                     #cam_image = positive_cam_image - negative_cam_image
                     #cam_image = negative_cam_image - positive_cam_image
                     #cam_image = (positive_cam_image + negative_cam_image)/2
                     #cam_image = cam_image.abs()
                     
-                    cam_image = (cam_image - cam_image.min()) / (cam_image.max() - cam_image.min())
+                    # cam_image = (cam_image - cam_image.min()) / (cam_image.max() - cam_image.min())
                     #print(f'cam_image before abs: \n{cam_image}')
                     
                     #print(f'cam_image after abs: \n{cam_image}')
@@ -286,7 +329,8 @@ def main():
                     #cam_text = (cam_text - cam_text.min()) / (cam_text.max() - cam_text.min())
                 
                     
-                    pert_acc = perturbation_image(clip_model, img, tokenized_text, cam_image, pert_steps, pert_acc, is_positive_pert)   
+                    # pert_acc = perturbation_image(clip_model, img, tokenized_text, cam_image, pert_steps, pert_acc, is_positive_pert)   
+                    pert_acc = perturbation_image(clip_model, img, tokenized_text, positive_diff_cam, negative_diff_cam, pert_steps, pert_acc, is_positive_pert)   
                     curr_pert_result = [round(res / (index-num_equal+1) * 100, 2) for res in pert_acc]
                     iterator.set_description(f"Acc: {curr_pert_result}")
                 print(f"Acc: {curr_pert_result}")
