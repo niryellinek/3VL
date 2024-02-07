@@ -20,20 +20,23 @@ from torch import optim
 from torch import nn  
 from torch.utils.data import DataLoader, Dataset  
 from tqdm import tqdm
-#import clip  
+
+
+ 
+
 from torchvision.datasets import CIFAR100
 from torchvision.datasets import ImageNet
 from torchvision.datasets import CocoCaptions
 from tqdm import tqdm
-from robustness.robustness.tools.breeds_helpers import ClassHierarchy
-from robustness.robustness.tools.breeds_helpers import setup_breeds
+# from robustness.robustness.tools.breeds_helpers import ClassHierarchy
+# from robustness.robustness.tools.breeds_helpers import setup_breeds
 
 #os.environ['TRANSFORMERS_CACHE'] = '/mnt5/nir/transformers/cache/'
 #Disabling transformers parallelism to avoid deadlock with Dataloader parallelism
 #os.environ['TOKENIZERS_PARALLELISM'] = 'false'
 
 import json
-from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
+# from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
 import string
 #from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, T5Tokenizer, T5ForConditionalGeneration
 import random
@@ -48,9 +51,13 @@ import plotly.graph_objects as go
 from create_coarse_sentences import Node, get_t5_opposite, find_word_difference, expand_caption, get_box_text, plotly_plot_tree
 from create_coarse_sentences import get_caption_tree6, get_caption_tree6_lemmas, get_caption_tree6_shuffled_nouns_adjectives, get_caption_tree6_shuffle_all, get_caption_tree6_shuffle_random_all_branches, get_caption_tree6_with_noun_adj_shuffle
 from create_coarse_sentences import get_caption_tree4, get_caption_tree6_1, get_caption_tree6_2, get_caption_tree8, get_caption_tree6_shuffle_all_branches, get_caption_tree6_shuffle_nouns_all_branches, get_caption_tree6_with_random_shuffle, get_caption_tree6_with_all_shuffles
+from create_coarse_sentences import get_caption_tree6_gen_si, get_caption_tree6_spatial_negate, get_caption_tree6_max_neg
 
 #train CLIP with LoRA
 from lora.lib.CLIP.clip import *
+
+#train CLIP without LoRA
+# import clip 
 
 #CLIP with LoRA and hilaCAM - adds gradient hooks (use only for inference. no need to train with it as it requires more memory)
 #from hilaCAM_lora.lib.CLIP.clip import *
@@ -58,7 +65,7 @@ from lora.lib.CLIP.clip import *
 from PIL import Image, ImageDraw, ImageFont
 import matplotlib.pyplot as plt
 import cv2
-from gradcam.CLIP_explainability import get_image_text_relevance
+# from gradcam.CLIP_explainability import get_image_text_relevance
 #import datasets
 import sys
 sys.path.insert(0, '/mnt5/nir/CLIP/')
@@ -263,8 +270,18 @@ class DecisionTreeClipModel(nn.Module):
     super(DecisionTreeClipModel, self).__init__()
     
     vit_name = 'ViT-B/32'
-    #self.load_model(base_name=vit_name, weight_name=checkpoint_file)
+    # vit_name = 'RN50' 
+    # vit_name = 'RN50x4'
+    # self.load_model(base_name=vit_name, weight_name=checkpoint_file)
+
+
+    #load WITHOUT LoRA 
+    # self.clip_model, self.preprocess = clip.load(vit_name, device=device, jit=False)
+        
+    #load with LoRA cLIP
     self.clip_model, self.preprocess = self.load_model(base_name=vit_name, lora_r=lora)
+
+    
     #self.freeze_visual_head()
     self.clip_model = self.clip_model.float()
     #self.clip_model = clip_model.float()
@@ -1214,26 +1231,44 @@ def DT_Contrastive_CLIP_train(DT_CLIP_model, num_epochs, data_loader, tree_crite
 
   # PATH = '/mnt5/nir/CLIP/interpret/COCO_DT_0.5_caption6_RB_size_LoRA_1_contrast_LR_3e6_checkpoint_epoch_0016.pt.tar'
 
+  #checkpoint trained with get_caption_tree6(flan T5) with spatial negatve from VSR WITH LoRA 0.5 * DT loss  + 0.5 * contrastive loss (tree_loss_weight = 0.5)
+  # PATH = '/mnt5/nir/CLIP/interpret/COCO_spatial_negate_caption6_WITH_LoRA_1_LR_3e6_checkpoint_epoch_0010.pt.tar'
+
+  #checkpoint trained with get_caption_tree6(flan T5) with spatial negatve from VSR WITH LoRA 0.5 * DT loss  + 0.5 * contrastive loss (tree_loss_weight = 0.5)
+  # PATH = '/mnt5/nir/CLIP/interpret/COCO_max_negatives_8_caption6_LoRA_1_LR_3e6_checkpoint_epoch_0015.pt.tar'
+
+  # PATH = '/mnt5/nir/CLIP/interpret/COCO_max_negatives_9_caption6_WITH_LoRA_1_LR_3e6_checkpoint_epoch_0007.pt.tar'
+  PATH = '/mnt5/nir/CLIP/interpret/COCO_max_negatives_10_caption6_LoRA_1_LR_3e6_checkpoint_epoch_0011.pt.tar'
+
+  
+
   
   # checkpoint = torch.load(PATH)
   # DT_CLIP_model.clip_model.load_state_dict(checkpoint['state_dict'])
   # optimizer.load_state_dict(checkpoint['optimizer'])
   # loaded_epoch = checkpoint['completed_epoch']
-  # #loss = checkpoint['loss']
+   #loss = checkpoint['loss']
   # print(f'DT_Contrastive_CLIP_train: loaded checkpoint from path: {PATH}')
   # print(f'DT_Contrastive_CLIP_train: loaded epoch: {loaded_epoch}')
 
-  # print(f'DT_Contrastive_CLIP_train: start from scratch (epoch: {loaded_epoch})')
+  print(f'DT_Contrastive_CLIP_train: start from scratch (epoch: {loaded_epoch})')
 
+  # tree_func = get_caption_tree6_gen_si
+  # tree_func = get_caption_tree6
+  # tree_func = get_caption_tree6_spatial_negate
+  tree_func = get_caption_tree6_max_neg
   tree_loss_weight = 0.5
+
+  max_negs = 15
+  print(f'train with max_negs: {max_negs}, lora_rank: {DT_CLIP_model.lora}, tree_loss_weight: {tree_loss_weight}, tree_func: {tree_func}')
   # print(f'train with lora_rank: {DT_CLIP_model.lora}, tree_loss_weight: {tree_loss_weight}, get_caption_tree6_shuffle_all_branches: flan t5 opposites if exist otherwise co-hyponym.')
   # print(f'train with lora_rank: {DT_CLIP_model.lora}, tree_loss_weight: {tree_loss_weight}, get_caption_tree6: RB color -> flan t5 opposites if exist otherwise co-hyponym.')
-  print(f'train with lora_rank: {DT_CLIP_model.lora}, tree_loss_weight: {tree_loss_weight}, get_caption_tree6_shuffle_all_branches: rule based -> flan t5 opposites if exist otherwise co-hyponym. add all shuffuled caption after each branch')
+#   print(f'train with lora_rank: {DT_CLIP_model.lora}, tree_loss_weight: {tree_loss_weight}, get_caption_tree6_shuffle_all_branches: rule based -> flan t5 opposites if exist otherwise co-hyponym. add all shuffuled caption after each branch')
   # print(f'train with lora_rank: {DT_CLIP_model.lora}, tree_loss_weight: {tree_loss_weight}, get_caption_tree6_with_random_shuffle: flan t5 opposites if exist otherwise co-hyponym. with random shuffle')
   # print(f'train with lora_rank: {DT_CLIP_model.lora}, tree_loss_weight: {tree_loss_weight}, get_caption_tree6_with_noun_adj_shuffle: flan t5 opposites if exist otherwise co-hyponym. with nouns and adjectives shuffle')
   # print(f'train with lora_rank: {DT_CLIP_model.lora}, tree_loss_weight: {tree_loss_weight}, get_caption_tree6_with_all_shuffles: flan t5 opposites if exist otherwise co-hyponym. with all shuffles')
 
-   
+  
   for epoch in range(loaded_epoch,num_epochs):
     print(f'start DT_Contrastive_CLIP_train epoch#: {epoch+1}')
 
@@ -1254,14 +1289,15 @@ def DT_Contrastive_CLIP_train(DT_CLIP_model, num_epochs, data_loader, tree_crite
       #print(f'captions[0][0]: {captions[0][0]}')
       # shuffle_func = get_caption_tree6
       # shuffle_func = get_caption_tree6_narratives
-      shuffle_func = get_caption_tree6_shuffle_all_branches
+    #   shuffle_func = get_caption_tree6_shuffle_all_branches
       with torch.no_grad(): 
         # root, true_label_path, all_tree_nodes, edges ,node_texts = get_caption_tree6(captions[rand_sample_index])
         # root, true_label_path, all_tree_nodes, edges ,node_texts = get_caption_tree6_with_random_shuffle(captions[rand_sample_index])
         # root, true_label_path, all_tree_nodes, edges ,node_texts = get_caption_tree6_with_noun_adj_shuffle(captions[rand_sample_index])
         # root, true_label_path, all_tree_nodes, edges ,node_texts = get_caption_tree6_with_all_shuffles(captions[rand_sample_index])
 
-        root, true_label_path, all_tree_nodes, edges ,node_texts = shuffle_func(captions[rand_sample_index])
+
+        root, true_label_path, all_tree_nodes, edges ,node_texts = tree_func(captions[rand_sample_index], max_negs)
 
 
         #rare, but can happen that node_texts are empty ( node_texts = [''] ) (no noun chunks)
@@ -1277,7 +1313,7 @@ def DT_Contrastive_CLIP_train(DT_CLIP_model, num_epochs, data_loader, tree_crite
             num_tries += 1
             idx_list = [*range(len(images))]
             rand_sample_index = random.choice([idx for idx in idx_list if idx not in used_indexes])
-            root, true_label_path, all_tree_nodes, edges ,node_texts = shuffle_func(captions[rand_sample_index])
+            root, true_label_path, all_tree_nodes, edges ,node_texts = tree_func(captions[rand_sample_index], max_negs)
 
           else:
             break
@@ -1323,7 +1359,7 @@ def DT_Contrastive_CLIP_train(DT_CLIP_model, num_epochs, data_loader, tree_crite
 
       #tree_loss_weight = 0.2
       #tree_loss_weight = 0.8
-      #tree_loss_weight = 0.5
+      # tree_loss_weight = 0.5
       
       total_loss = tree_loss*tree_loss_weight + (1-tree_loss_weight)*contrastive_loss
 
